@@ -1,0 +1,45 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "User profile data including preferences.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Firebase Auth UID" },
+        "email": { "type": "string", "format": "email" },
+        "displayName": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email"]
+    },
+    "SavedItinerary": {
+      "title": "Saved Itinerary",
+      "description": "A flight itinerary saved by a user.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Owner UID" },
+        "itineraryId": { "type": "string" },
+        "origin": { "type": "string" },
+        "destination": { "type": "string" },
+        "reliabilityScore": { "type": "number" },
+        "price": { "type": "number" },
+        "legs": { "type": "array", "items": { "type": "object" } },
+        "status": { "type": "string", "enum": ["RELIABLE", "CAUTION", "HIGH RISK"] },
+        "connectionRisk": { "type": "string", "enum": ["LOW", "MEDIUM", "HIGH"] },
+        "connectionRiskValue": { "type": "number" },
+        "savedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "itineraryId", "origin", "destination", "reliabilityScore", "price", "legs", "status", "connectionRisk", "connectionRiskValue", "savedAt"]
+    }
+  },
+  "firestore": {
+    "/users/{uid}": {
+      "schema": "UserProfile",
+      "description": "User profile documents."
+    },
+    "/saved_itineraries/{itineraryId}": {
+      "schema": "SavedItinerary",
+      "description": "Itineraries saved by users."
+    }
+  }
+}

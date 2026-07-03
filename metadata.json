@@ -1,0 +1,6 @@
+{
+  "name": "Smart Flight",
+  "description": "A proactive flight decision-support system leveraging machine learning to predict disruptions, score route reliability, and assess connection risks before booking.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

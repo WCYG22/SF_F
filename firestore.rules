@@ -1,0 +1,97 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users
+    // Document ID: {uid}
+    // Fields:
+    //   - uid: string (required) - Firebase Auth UID
+    //   - email: string (required, email format) - User's email
+    //   - displayName: string (optional) - User's display name
+    //   - createdAt: timestamp (required) - When the profile was created
+    //
+    // Collection: saved_itineraries
+    // Document ID: {itineraryId}
+    // Fields:
+    //   - uid: string (required) - Owner UID
+    //   - itineraryId: string (required) - Original itinerary ID
+    //   - origin: string (required) - Origin airport code
+    //   - destination: string (required) - Destination airport code
+    //   - reliabilityScore: number (required) - 0-10 score
+    //   - price: number (required) - Price in RM
+    //   - legs: list (required) - List of flight legs
+    //   - savedAt: timestamp (required) - When the itinerary was saved
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+          (request.auth.token.email == "wongchengyong100@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    function isValidEmail(email) {
+      return email is string && email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+
+    function isValidUser(data) {
+      return hasOnlyAllowedFields(['uid', 'email', 'displayName', 'createdAt', 'role']) &&
+             data.uid == request.auth.uid &&
+             isValidEmail(data.email) &&
+             (data.role == 'user' || isAdmin());
+    }
+
+    function isValidItinerary(data) {
+      return hasOnlyAllowedFields(['uid', 'itineraryId', 'origin', 'destination', 'reliabilityScore', 'price', 'legs', 'status', 'connectionRisk', 'connectionRiskValue', 'savedAt']) &&
+             data.uid == request.auth.uid &&
+             data.origin is string && data.origin.size() == 3 &&
+             data.destination is string && data.destination.size() == 3 &&
+             data.reliabilityScore is number && data.reliabilityScore >= 0 && data.reliabilityScore <= 10 &&
+             data.price is number && data.price >= 0 &&
+             data.legs is list && data.legs.size() > 0 &&
+             data.status in ['RELIABLE', 'CAUTION', 'HIGH RISK'] &&
+             data.connectionRisk in ['LOW', 'MEDIUM', 'HIGH'] &&
+             data.connectionRiskValue is number && data.connectionRiskValue >= 0 && data.connectionRiskValue <= 100;
+    }
+
+    // ===============================================================
+    // Collection Rules
+    // ===============================================================
+
+    match /users/{uid} {
+      allow read: if isOwner(uid) || isAdmin();
+      allow create: if isOwner(uid) && isValidUser(request.resource.data);
+      allow update: if (isOwner(uid) && isValidUser(request.resource.data) && request.resource.data.role == resource.data.role) || isAdmin();
+    }
+
+    match /saved_itineraries/{itineraryId} {
+      allow read: if isAuthenticated() && (resource.data.uid == request.auth.uid || isAdmin());
+      allow create: if isAuthenticated() && isValidItinerary(request.resource.data);
+      allow update: if isAuthenticated() && (resource.data.uid == request.auth.uid && isValidItinerary(request.resource.data)) || isAdmin();
+      allow delete: if isAuthenticated() && (resource.data.uid == request.auth.uid || isAdmin());
+    }
+  }
+}
