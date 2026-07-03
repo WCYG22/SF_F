@@ -291,112 +291,72 @@ export const LiveFlightView: React.FC<LiveFlightViewProps> = ({ isDemoMode = fal
             </div>
           </Card>
 
-          {/* Technical Data Grid */}
+          {/* Technical Data Grid - Simplified */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Card className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 border-blue-500/20">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                  <div className="p-3 bg-blue-500/20 rounded-lg">
-                    <Navigation className="w-5 h-5 text-blue-400" />
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <div className="p-2 bg-blue-500/20 rounded-lg">
+                    <Navigation className="w-4 h-4 text-blue-400" />
                   </div>
-                  <div>
-                    <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest block">Aircraft Info</span>
-                    <span className="text-[8px] text-blue-400/60 uppercase tracking-tighter">Details</span>
-                  </div>
+                  <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest">Aircraft Info</span>
                 </div>
-                <div className="flex items-center gap-1.5 px-2.5 py-1 bg-blue-500/15 rounded-full border border-blue-500/30">
-                  <span className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse" />
-                  <span className="text-[8px] font-black text-blue-400 uppercase tracking-tighter">Live</span>
-                </div>
+                <div className="w-1.5 h-1.5 bg-blue-400 rounded-full" />
               </div>
-              <div className="space-y-4">
-                <div>
-                  <div className="text-[10px] text-blue-400/60 font-bold uppercase mb-1 tracking-tighter">Aircraft Model</div>
-                  <div className="text-sm font-bold mono text-white">{tracking.aircraft.model}</div>
+              <div className="space-y-2 text-[10px]">
+                <div className="flex justify-between">
+                  <span className="text-blue-400/60">Model</span>
+                  <span className="text-white font-bold">{tracking.aircraft.model}</span>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <div className="text-[10px] text-blue-400/60 font-bold uppercase mb-1 tracking-tighter">Registration</div>
-                    <div className="text-xs font-bold mono text-white">{tracking.aircraft.registration}</div>
-                  </div>
-                  <div>
-                    <div className="text-[10px] text-blue-400/60 font-bold uppercase mb-1 tracking-tighter">Age</div>
-                    <div className="text-xs font-bold mono text-white">{tracking.aircraft.age}</div>
-                  </div>
+                <div className="flex justify-between">
+                  <span className="text-blue-400/60">Registration</span>
+                  <span className="text-white font-bold mono">{tracking.aircraft.registration}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-blue-400/60">Age</span>
+                  <span className="text-white font-bold">{tracking.aircraft.age}</span>
                 </div>
               </div>
             </Card>
 
             <Card className="bg-gradient-to-br from-green-500/10 to-green-600/5 border-green-500/20">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                  <div className="p-3 bg-green-500/20 rounded-lg">
-                    <Wind className="w-5 h-5 text-green-400" />
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <div className="p-2 bg-green-500/20 rounded-lg">
+                    <Wind className="w-4 h-4 text-green-400" />
                   </div>
-                  <div>
-                    <span className="text-[10px] font-black text-green-400 uppercase tracking-widest block">Live Telemetry</span>
-                    <span className="text-[8px] text-green-400/60 uppercase tracking-tighter">Real-time</span>
-                  </div>
+                  <span className="text-[10px] font-black text-green-400 uppercase tracking-widest">Live Telemetry</span>
                 </div>
-                <div className="flex items-center gap-1.5 px-2.5 py-1 bg-green-500/15 rounded-full border border-green-500/30">
-                  <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
-                  <span className="text-[8px] font-black text-green-400 uppercase tracking-tighter">Live</span>
-                </div>
+                <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
               </div>
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <div className="text-[10px] text-green-400/60 font-bold uppercase tracking-tighter">Altitude</div>
-                  <motion.div 
-                    animate={{ opacity: [1, 0.7, 1] }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                    className="text-sm font-bold mono text-green-400"
-                  >
-                    {tracking.altitude.toLocaleString()} ft
-                  </motion.div>
+              <div className="space-y-2 text-[10px]">
+                <div className="flex justify-between">
+                  <span className="text-green-400/60">Altitude</span>
+                  <span className="text-green-400 font-bold mono">{tracking.altitude.toLocaleString()} ft</span>
                 </div>
-                <div className="flex justify-between items-center">
-                  <div className="text-[10px] text-green-400/60 font-bold uppercase tracking-tighter">Ground Speed</div>
-                  <motion.div 
-                    animate={{ opacity: [1, 0.7, 1] }}
-                    transition={{ duration: 2, repeat: Infinity, delay: 1 }}
-                    className="text-sm font-bold mono text-green-400"
-                  >
-                    {tracking.speed} kph
-                  </motion.div>
-                </div>
-                <div className="h-1.5 w-full bg-white/5 rounded-full mt-2 overflow-hidden border border-green-500/20">
-                  <motion.div 
-                    animate={{ width: [0, 100, 0] }}
-                    transition={{ duration: 3, repeat: Infinity }}
-                    className="h-full bg-gradient-to-r from-green-500/40 to-green-400/80" 
-                  />
+                <div className="flex justify-between">
+                  <span className="text-green-400/60">Ground Speed</span>
+                  <span className="text-green-400 font-bold mono">{tracking.speed} kph</span>
                 </div>
               </div>
             </Card>
 
             <Card className="bg-gradient-to-br from-accent/10 to-accent/5 border-accent/30">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                  <div className="p-3 bg-accent/20 rounded-lg">
-                    <Clock className="w-5 h-5 text-accent" />
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <div className="p-2 bg-accent/20 rounded-lg">
+                    <Clock className="w-4 h-4 text-accent" />
                   </div>
-                  <div>
-                    <span className="text-[10px] font-black text-accent uppercase tracking-widest block">Arrival Estimate</span>
-                    <span className="text-[8px] text-accent/60 uppercase tracking-tighter">Prediction</span>
-                  </div>
+                  <span className="text-[10px] font-black text-accent uppercase tracking-widest">Arrival Estimate</span>
                 </div>
-                <div className="flex items-center gap-1.5 px-2.5 py-1 bg-accent/15 rounded-full border border-accent/30">
-                  <span className="w-1.5 h-1.5 bg-accent rounded-full animate-pulse" />
-                  <span className="text-[8px] font-black text-accent uppercase tracking-tighter">Live</span>
-                </div>
+                <div className="w-1.5 h-1.5 bg-accent rounded-full animate-pulse" />
               </div>
-              <div className="text-center py-2">
-                <div className="text-4xl font-black mono text-white mb-2">{formatTime(tracking.estimatedArrival)}</div>
-                <div className="text-[10px] text-accent font-bold uppercase tracking-widest mb-2">{formatDate(tracking.estimatedArrival)}</div>
-                <div className="text-[8px] text-white/60 font-bold uppercase tracking-tighter mb-4">Estimated Landing</div>
-                <div className="flex items-center justify-center gap-2 text-green-400 bg-green-500/10 p-2.5 rounded-lg border border-green-500/20">
-                  <ShieldCheck className="w-4 h-4" />
-                  <span className="text-[8px] font-black uppercase tracking-widest">On Schedule</span>
+              <div className="text-center space-y-1">
+                <div className="text-2xl font-black mono text-white">{formatTime(tracking.estimatedArrival)}</div>
+                <div className="text-[8px] text-accent font-bold uppercase tracking-tighter">{formatDate(tracking.estimatedArrival)}</div>
+                <div className="flex items-center justify-center gap-1.5 text-green-400 text-[8px] font-black uppercase tracking-tighter mt-2">
+                  <ShieldCheck className="w-3 h-3" />
+                  On Schedule
                 </div>
               </div>
             </Card>
@@ -409,30 +369,26 @@ export const LiveFlightView: React.FC<LiveFlightViewProps> = ({ isDemoMode = fal
               <div className="absolute inset-0 bg-[linear-gradient(rgba(242,125,38,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(242,125,38,0.1)_1px,transparent_1px)] bg-[50px_50px]" />
             </div>
             
-            {/* Radar Scanning Effect */}
+            {/* Radar Scanning Effect - Simplified */}
             <div className="absolute inset-0">
               <motion.div 
-                animate={{ 
-                  rotate: 360,
-                  opacity: [0.2, 0.5, 0.2]
-                }}
-                transition={{ 
-                  rotate: { duration: 12, repeat: Infinity, ease: "linear" },
-                  opacity: { duration: 3, repeat: Infinity, ease: "easeInOut" }
-                }}
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-conic-gradient from-accent/20 to-transparent pointer-events-none"
+                animate={{ rotate: 360 }}
+                transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] pointer-events-none opacity-20"
                 style={{ 
-                  clipPath: 'polygon(50% 50%, 100% 0, 100% 100%)',
-                  backgroundImage: 'conic-gradient(from 0deg, rgba(242,125,38,0.3), transparent)'
+                  backgroundImage: 'conic-gradient(from 0deg, rgba(242,125,38,0.4), transparent)',
+                  clipPath: 'polygon(50% 50%, 100% 0, 100% 100%)'
                 }}
               />
               {[1, 2, 3].map((i) => (
-                <motion.div
+                <div
                   key={i}
-                  initial={{ scale: 0, opacity: 0.4 }}
-                  animate={{ scale: 2.5, opacity: 0 }}
-                  transition={{ duration: 5, repeat: Infinity, delay: i * 1.6, ease: "easeOut" }}
-                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-56 h-56 border border-accent/30 rounded-full pointer-events-none"
+                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border border-accent/20 rounded-full pointer-events-none"
+                  style={{
+                    width: `${100 + i * 100}px`,
+                    height: `${100 + i * 100}px`,
+                    animation: `pulse 4s ease-out ${i * 1.3}s infinite`
+                  }}
                 />
               ))}
             </div>
@@ -486,49 +442,32 @@ export const LiveFlightView: React.FC<LiveFlightViewProps> = ({ isDemoMode = fal
                   }}
                 >
                   <g className="text-accent">
-                    <motion.circle 
-                      animate={{ r: [8, 12, 8] }}
-                      transition={{ duration: 2, repeat: Infinity }}
-                      cy="0"
-                      className="fill-none stroke-accent stroke-2 opacity-60" 
-                    />
-                    <motion.circle 
-                      animate={{ scale: [1, 1.5, 1] }}
-                      transition={{ duration: 2, repeat: Infinity }}
-                      r="6" 
-                      className="fill-accent/30" 
-                    />
+                    <circle r="6" className="fill-accent/30" />
                     <Plane className="w-5 h-5 -translate-x-1/2 -translate-y-1/2 fill-accent text-accent" />
                   </g>
                 </motion.g>
               </svg>
             </div>
 
-            {/* Overlay Info */}
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-background via-background/50 to-transparent p-6 z-20">
-              <div className="flex justify-between items-end">
-                <div className="flex flex-col gap-2">
-                  <div className="flex items-center gap-2">
-                    <motion.div 
-                      animate={{ scale: [1, 1.2, 1] }}
-                      transition={{ duration: 1.5, repeat: Infinity }}
-                      className="w-2 h-2 bg-accent rounded-full"
-                    />
-                    <motion.span 
-                      animate={{ opacity: [1, 0.5, 1] }}
-                      transition={{ duration: 2, repeat: Infinity }}
-                      className="text-[10px] font-black text-accent uppercase tracking-widest"
-                    >
-                      Live Radar Active
-                    </motion.span>
-                  </div>
-                  <div className="text-[8px] text-white/50 font-bold uppercase tracking-tighter mono">
-                    LAT: {(3.1390 + (Math.random() * 0.1)).toFixed(4)} • LON: {(101.6869 + (Math.random() * 0.1)).toFixed(4)}
-                  </div>
+            {/* Overlay Info - Below Live Radar Active */}
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-background via-background/50 to-transparent p-6 z-20 space-y-3">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-accent rounded-full" />
+                <span className="text-[10px] font-black text-accent uppercase tracking-widest">Live Radar Active</span>
+              </div>
+              
+              <div className="grid grid-cols-3 gap-4 text-center">
+                <div>
+                  <div className="text-[8px] text-white/50 font-bold uppercase tracking-tighter mb-1">Current Position</div>
+                  <div className="text-sm font-black mono text-accent">{tracking.progress}%</div>
                 </div>
-                <div className="text-right">
-                  <div className="text-[10px] font-black text-white/70 uppercase tracking-widest mb-1">Route Progress</div>
-                  <div className="text-xl font-black mono text-accent">{tracking.progress}%</div>
+                <div>
+                  <div className="text-[8px] text-white/50 font-bold uppercase tracking-tighter mb-1">Latitude</div>
+                  <div className="text-sm font-bold mono text-white/70">{(3.1390 + (Math.random() * 0.1)).toFixed(4)}</div>
+                </div>
+                <div>
+                  <div className="text-[8px] text-white/50 font-bold uppercase tracking-tighter mb-1">Longitude</div>
+                  <div className="text-sm font-bold mono text-white/70">{(101.6869 + (Math.random() * 0.1)).toFixed(4)}</div>
                 </div>
               </div>
             </div>
