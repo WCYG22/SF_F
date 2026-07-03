@@ -2182,6 +2182,30 @@ function ItineraryDetailView({
         </div>
       </div>
 
+      {/* Summary Card */}
+      <Card className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <div className="text-center">
+          <p className="text-[10px] text-white/60 uppercase font-bold tracking-widest mb-1">Total Price</p>
+          <p className="text-2xl font-black mono text-accent">RM{itinerary.price}</p>
+        </div>
+        <div className="text-center border-l border-white/10">
+          <p className="text-[10px] text-white/60 uppercase font-bold tracking-widest mb-1">Duration</p>
+          <p className="text-2xl font-black mono text-white">{itinerary.totalDuration || 'N/A'}</p>
+        </div>
+        <div className="text-center border-l border-white/10">
+          <p className="text-[10px] text-white/60 uppercase font-bold tracking-widest mb-1">Stops</p>
+          <p className="text-2xl font-black mono text-white">{itinerary.legs.length > 1 ? itinerary.legs.length - 1 : 'Non-stop'}</p>
+        </div>
+        <div className="text-center border-l border-white/10">
+          <p className="text-[10px] text-white/60 uppercase font-bold tracking-widest mb-1">Airlines</p>
+          <p className="text-sm font-bold mono text-white truncate">{[...new Set(itinerary.legs.map(l => l.airline))].join(', ').substring(0, 20)}</p>
+        </div>
+        <div className="text-center border-l border-white/10">
+          <p className="text-[10px] text-white/60 uppercase font-bold tracking-widest mb-1">Reliability</p>
+          <Badge variant={itinerary.status === 'RELIABLE' ? 'success' : 'warning'} className="w-full justify-center">{itinerary.status}</Badge>
+        </div>
+      </Card>
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Main Reliability Card */}
         <Card className="md:col-span-2 relative overflow-hidden">
