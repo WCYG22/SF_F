@@ -13,6 +13,7 @@ import {
   AlertCircle,
   Activity,
   TrendingDown,
+  TrendingUp,
   Save,
   ArrowRightLeft,
   LogIn,
@@ -2197,12 +2198,12 @@ function ItineraryDetailView({
           <p className="text-2xl font-black mono text-white">{itinerary.legs.length > 1 ? itinerary.legs.length - 1 : 'Non-stop'}</p>
         </div>
         <div className="text-center border-l border-white/10">
-          <p className="text-[10px] text-white/60 uppercase font-bold tracking-widest mb-1">Airlines</p>
-          <p className="text-sm font-bold mono text-white truncate">{[...new Set(itinerary.legs.map(l => l.airline))].join(', ').substring(0, 20)}</p>
+          <p className="text-[10px] text-white/60 uppercase font-bold tracking-widest mb-1">Airline</p>
+          <p className="text-lg font-bold text-white">{itinerary.legs[0]?.airline || 'Unknown'}</p>
         </div>
         <div className="text-center border-l border-white/10">
           <p className="text-[10px] text-white/60 uppercase font-bold tracking-widest mb-1">Reliability</p>
-          <Badge variant={itinerary.status === 'RELIABLE' ? 'success' : 'warning'} className="w-full justify-center">{itinerary.status}</Badge>
+          <p className="text-2xl font-black mono text-accent">{itinerary.reliabilityScore.toFixed(2)}/10</p>
         </div>
       </Card>
 
@@ -2290,52 +2291,82 @@ function ItineraryDetailView({
             {higherReliability ? (
               <Card 
                 onClick={() => onSelectAlternative(higherReliability)}
-                className="bg-white/[0.02] border-dashed border-white/10 hover:bg-white/5 transition-colors cursor-pointer group"
+                className="bg-gradient-to-br from-green-500/5 to-green-600/5 border-green-500/30 hover:border-green-500/50 hover:bg-green-500/10 transition-all cursor-pointer group"
               >
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <Plane className="w-4 h-4 text-green-400 -rotate-45" />
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-green-400">Higher Reliability Option</span>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <TrendingUp className="w-4 h-4 text-green-400" />
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-green-400">Higher Reliability</span>
+                    </div>
+                    <Badge variant="success" className="text-[10px]">+{(higherReliability.reliabilityScore - itinerary.reliabilityScore).toFixed(2)}</Badge>
                   </div>
-                  <div className="text-sm font-bold mono text-accent">
-                    {higherReliability.price > itinerary.price ? `RM+${higherReliability.price - itinerary.price}` : `RM-${itinerary.price - higherReliability.price}`}
+                  
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-white/60 text-[10px] uppercase font-bold">Flight</span>
+                      <span className="text-lg font-bold mono group-hover:text-green-400 transition-colors">{higherReliability.legs?.[0]?.flightNumber}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-white/60 text-[10px] uppercase font-bold">Airline</span>
+                      <span className="text-sm font-bold">{higherReliability.legs?.[0]?.airline}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-white/60 text-[10px] uppercase font-bold">Score</span>
+                      <span className="text-lg font-black mono text-green-400">{higherReliability.reliabilityScore.toFixed(2)}/10</span>
+                    </div>
+                    <div className="flex items-center justify-between pt-2 border-t border-green-500/20">
+                      <span className="text-white/60 text-[10px] uppercase font-bold">Price Difference</span>
+                      <span className={cn("text-sm font-bold mono", higherReliability.price > itinerary.price ? "text-red-400" : "text-green-400")}>
+                        {higherReliability.price > itinerary.price ? `+RM${higherReliability.price - itinerary.price}` : `-RM${itinerary.price - higherReliability.price}`}
+                      </span>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="text-lg font-bold mono group-hover:text-accent transition-colors">
-                    {higherReliability.legs?.[0]?.airline || 'Unknown'} • {higherReliability.legs?.[0]?.flightNumber || 'Unknown'}
-                  </div>
-                  <div className="text-xs mono text-muted">Score: {higherReliability.reliabilityScore}/10</div>
                 </div>
               </Card>
             ) : (
-              <div className="p-8 bg-white/5 rounded-3xl border border-dashed border-white/10 flex items-center justify-center text-[10px] text-muted uppercase tracking-widest">
-                No higher reliability options found
+              <div className="p-8 bg-white/5 rounded-2xl border border-dashed border-white/10 flex items-center justify-center text-[10px] text-muted uppercase tracking-widest text-center">
+                No higher reliability options available
               </div>
             )}
 
             {betterPrice ? (
               <Card 
                 onClick={() => onSelectAlternative(betterPrice)}
-                className="bg-white/[0.02] border-dashed border-white/10 hover:bg-white/5 transition-colors cursor-pointer group"
+                className="bg-gradient-to-br from-blue-500/5 to-blue-600/5 border-blue-500/30 hover:border-blue-500/50 hover:bg-blue-500/10 transition-all cursor-pointer group"
               >
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <TrendingDown className="w-4 h-4 text-blue-400" />
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-blue-400">Better Price Option</span>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <TrendingDown className="w-4 h-4 text-blue-400" />
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-blue-400">Better Price</span>
+                    </div>
+                    <Badge variant="accent" className="text-[10px] bg-blue-500/20 text-blue-400 border-blue-500/30">-RM{itinerary.price - betterPrice.price}</Badge>
                   </div>
-                  <div className="text-sm font-bold mono text-accent">RM-{itinerary.price - betterPrice.price}</div>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="text-lg font-bold mono group-hover:text-accent transition-colors">
-                    {betterPrice.legs?.[0]?.airline || 'Unknown'} • {betterPrice.legs?.[0]?.flightNumber || 'Unknown'}
+                  
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-white/60 text-[10px] uppercase font-bold">Flight</span>
+                      <span className="text-lg font-bold mono group-hover:text-blue-400 transition-colors">{betterPrice.legs?.[0]?.flightNumber}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-white/60 text-[10px] uppercase font-bold">Airline</span>
+                      <span className="text-sm font-bold">{betterPrice.legs?.[0]?.airline}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-white/60 text-[10px] uppercase font-bold">Score</span>
+                      <span className="text-lg font-black mono text-blue-400">{betterPrice.reliabilityScore.toFixed(2)}/10</span>
+                    </div>
+                    <div className="flex items-center justify-between pt-2 border-t border-blue-500/20">
+                      <span className="text-white/60 text-[10px] uppercase font-bold">Total Price</span>
+                      <span className="text-sm font-bold mono text-blue-400">RM{betterPrice.price}</span>
+                    </div>
                   </div>
-                  <div className="text-xs mono text-muted">Score: {betterPrice.reliabilityScore}/10</div>
                 </div>
               </Card>
             ) : (
-              <div className="p-8 bg-white/5 rounded-3xl border border-dashed border-white/10 flex items-center justify-center text-[10px] text-muted uppercase tracking-widest">
-                No cheaper options found
+              <div className="p-8 bg-white/5 rounded-2xl border border-dashed border-white/10 flex items-center justify-center text-[10px] text-muted uppercase tracking-widest text-center">
+                No cheaper options available
               </div>
             )}
           </div>
