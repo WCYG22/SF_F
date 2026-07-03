@@ -165,176 +165,31 @@ export const LiveFlightView: React.FC<LiveFlightViewProps> = ({ isDemoMode = fal
           animate={{ opacity: 1, y: 0 }}
           className="space-y-6"
         >
-          {/* Main Tracking Card */}
-          <Card className="relative overflow-hidden border-accent/30 bg-gradient-to-br from-accent/5 to-background">
-            <div className="absolute top-0 right-0 p-8 opacity-3">
-              <Plane className="w-64 h-64 -rotate-45" />
-            </div>
 
-            <div className="relative z-10">
-              <div className="flex items-center justify-between mb-8 pb-8 border-b border-white/5">
-                <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 bg-accent/15 rounded-2xl flex items-center justify-center border border-accent/30 shadow-lg shadow-accent/10">
-                    <Plane className="w-8 h-8 text-accent" />
-                  </div>
-                  <div>
-                    <h3 className="text-3xl font-black mono text-white">{tracking.flightNumber}</h3>
-                    <p className="text-xs text-white/60 font-bold uppercase tracking-widest">{tracking.airline}</p>
-                  </div>
-                </div>
-                <Badge 
-                  variant={tracking.status === 'IN AIR' ? 'success' : 'warning'} 
-                  className="px-4 py-2 text-[10px] flex items-center gap-2 shadow-lg"
-                >
-                  {tracking.status === 'IN AIR' && (
-                    <span className="relative flex h-2 w-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                    </span>
-                  )}
-                  {tracking.status === 'IN AIR' ? (
-                    <motion.span
-                      animate={{ opacity: [1, 0.6, 1] }}
-                      transition={{ duration: 2, repeat: Infinity }}
-                    >
-                      {tracking.status}
-                    </motion.span>
-                  ) : (
-                    tracking.status
-                  )}
-                </Badge>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
-                <div className="text-center md:text-left p-6 bg-white/3 rounded-xl border border-white/5">
-                  <div className="text-xs text-white/50 font-bold uppercase tracking-widest mb-2">Departure</div>
-                  <div className="text-5xl font-black mono text-accent mb-2">{tracking.origin.airport}</div>
-                  <div className="text-xs text-white/60 font-bold uppercase mb-4">{tracking.origin.city}</div>
-                  <div className="space-y-2 border-t border-white/5 pt-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] text-white/50 uppercase font-bold">Time</span>
-                      <span className="text-lg font-bold mono text-white">{formatTime(tracking.origin.time)}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] text-white/50 uppercase font-bold">Date</span>
-                      <span className="text-[10px] text-white/60 mono">{formatDate(tracking.origin.time)}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] text-white/50 uppercase font-bold">Terminal</span>
-                      <span className="text-[10px] font-bold mono text-white">{tracking.origin.terminal}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] text-white/50 uppercase font-bold">Gate</span>
-                      <span className="text-[10px] font-bold mono text-white">{tracking.origin.gate}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="text-center p-6 bg-white/3 rounded-xl border border-white/5">
-                  <div className="text-xs text-white/50 font-bold uppercase tracking-widest mb-4">Live Radar Active</div>
-                  <div className="text-5xl font-black mono text-accent mb-2">{tracking.progress}%</div>
-                  <div className="text-xs text-white/60 font-bold uppercase">Current Position</div>
-                </div>
-
-                <div className="text-center md:text-right p-6 bg-white/3 rounded-xl border border-white/5">
-                  <div className="text-xs text-white/50 font-bold uppercase tracking-widest mb-2">Arrival</div>
-                  <div className="text-5xl font-black mono text-accent mb-2">{tracking.destination.airport}</div>
-                  <div className="text-xs text-white/60 font-bold uppercase mb-4">{tracking.destination.city}</div>
-                  <div className="space-y-2 border-t border-white/5 pt-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] text-white/50 uppercase font-bold">ETA</span>
-                      <span className="text-lg font-bold mono text-white">{formatTime(tracking.destination.time)}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] text-white/50 uppercase font-bold">Date</span>
-                      <span className="text-[10px] text-white/60 mono">{formatDate(tracking.destination.time)}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] text-white/50 uppercase font-bold">Terminal</span>
-                      <span className="text-[10px] font-bold mono text-white">{tracking.destination.terminal}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] text-white/50 uppercase font-bold">Gate</span>
-                      <span className="text-[10px] font-bold mono text-white">{tracking.destination.gate}</span>
-                    </div>
-                  </div>
-                </div>
+          {/* Flight Header */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Plane className="w-5 h-5 text-accent" />
+              <div>
+                <h3 className="text-xl font-black mono text-white">{tracking.flightNumber}</h3>
+                <p className="text-xs text-white/60 font-bold">{tracking.airline}</p>
               </div>
             </div>
-          </Card>
-
-          {/* Technical Data Grid - Simplified */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 border-blue-500/20">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <div className="p-2 bg-blue-500/20 rounded-lg">
-                    <Navigation className="w-4 h-4 text-blue-400" />
-                  </div>
-                  <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest">Aircraft Info</span>
-                </div>
-                <div className="w-1.5 h-1.5 bg-blue-400 rounded-full" />
-              </div>
-              <div className="space-y-2 text-[10px]">
-                <div className="flex justify-between">
-                  <span className="text-blue-400/60">Model</span>
-                  <span className="text-white font-bold">{tracking.aircraft.model}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-blue-400/60">Registration</span>
-                  <span className="text-white font-bold mono">{tracking.aircraft.registration}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-blue-400/60">Age</span>
-                  <span className="text-white font-bold">{tracking.aircraft.age}</span>
-                </div>
-              </div>
-            </Card>
-
-            <Card className="bg-gradient-to-br from-green-500/10 to-green-600/5 border-green-500/20">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <div className="p-2 bg-green-500/20 rounded-lg">
-                    <Wind className="w-4 h-4 text-green-400" />
-                  </div>
-                  <span className="text-[10px] font-black text-green-400 uppercase tracking-widest">Live Telemetry</span>
-                </div>
-                <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
-              </div>
-              <div className="space-y-2 text-[10px]">
-                <div className="flex justify-between">
-                  <span className="text-green-400/60">Altitude</span>
-                  <span className="text-green-400 font-bold mono">{tracking.altitude.toLocaleString()} ft</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-green-400/60">Ground Speed</span>
-                  <span className="text-green-400 font-bold mono">{tracking.speed} kph</span>
-                </div>
-              </div>
-            </Card>
-
-            <Card className="bg-gradient-to-br from-accent/10 to-accent/5 border-accent/30">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <div className="p-2 bg-accent/20 rounded-lg">
-                    <Clock className="w-4 h-4 text-accent" />
-                  </div>
-                  <span className="text-[10px] font-black text-accent uppercase tracking-widest">Arrival Estimate</span>
-                </div>
-                <div className="w-1.5 h-1.5 bg-accent rounded-full animate-pulse" />
-              </div>
-              <div className="text-center space-y-1">
-                <div className="text-2xl font-black mono text-white">{formatTime(tracking.estimatedArrival)}</div>
-                <div className="text-[8px] text-accent font-bold uppercase tracking-tighter">{formatDate(tracking.estimatedArrival)}</div>
-                <div className="flex items-center justify-center gap-1.5 text-green-400 text-[8px] font-black uppercase tracking-tighter mt-2">
-                  <ShieldCheck className="w-3 h-3" />
-                  On Schedule
-                </div>
-              </div>
-            </Card>
+            <Badge 
+              variant={tracking.status === 'IN AIR' ? 'success' : 'warning'} 
+              className="px-4 py-2 text-[10px] flex items-center gap-2"
+            >
+              {tracking.status === 'IN AIR' && (
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                </span>
+              )}
+              {tracking.status}
+            </Badge>
           </div>
 
-          {/* Dynamic Flight Path Visualization */}
+          {/* Radar Visualization - Centered - show only departure and arrival airports */}
           <Card className="h-80 bg-gradient-to-br from-accent/10 to-background border-accent/30 relative overflow-hidden group">
             {/* Animated Background Grid */}
             <div className="absolute inset-0 opacity-5">
