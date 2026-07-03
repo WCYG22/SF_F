@@ -2257,8 +2257,23 @@ function ItineraryDetailView({
                           <p className="text-sm font-bold">{format(parseISO(leg.departure.scheduled), 'HH:mm')}</p>
                           <p className="text-[10px] text-white/50">{format(parseISO(leg.departure.scheduled), 'dd MMM yyyy')}</p>
                         </div>
-                        <div className="text-center">
-                          <ArrowRight className="w-6 h-6 text-accent/40" />
+                        <div className="flex-1 flex items-center justify-center">
+                          <svg viewBox="0 0 300 80" className="w-full h-16 max-w-xs">
+                            {/* Curved arrow path */}
+                            <path
+                              d="M 20 60 Q 150 10, 280 60"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              className="text-accent"
+                            />
+                            {/* Start dot */}
+                            <circle cx="20" cy="60" r="5" fill="currentColor" className="text-accent" />
+                            {/* Arrow head */}
+                            <polygon points="280,60 270,55 275,60 270,65" fill="currentColor" className="text-accent" />
+                            {/* End dot */}
+                            <circle cx="280" cy="60" r="5" fill="currentColor" className="text-accent" />
+                          </svg>
                         </div>
                         <div>
                           <p className="text-[10px] text-white/60 uppercase font-bold tracking-widest mb-1">Arrival</p>
