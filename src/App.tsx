@@ -2294,7 +2294,7 @@ function ItineraryDetailView({
                               const diffMs = end.getTime() - start.getTime();
                               const hours = Math.floor(diffMs / 3600000);
                               const mins = Math.floor((diffMs % 3600000) / 60000);
-                              return `${hours}h ${mins}m`;
+                              return `${String(hours).padStart(2, '0')}h ${String(mins).padStart(2, '0')}m`;
                             })()}
                           </p>
                         </div>
