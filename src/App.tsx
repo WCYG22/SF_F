@@ -2291,7 +2291,13 @@ function ItineraryDetailView({
                             {(() => {
                               const start = parseISO(leg.departure.scheduled);
                               const end = parseISO(leg.arrival.scheduled);
-                              const diffMs = end.getTime() - start.getTime();
+                              let diffMs = end.getTime() - start.getTime();
+                              
+                              // If negative, add 24 hours (flight arrives next day)
+                              if (diffMs < 0) {
+                                diffMs += 24 * 3600000;
+                              }
+                              
                               const hours = Math.floor(diffMs / 3600000);
                               const mins = Math.floor((diffMs % 3600000) / 60000);
                               return `${String(hours).padStart(2, '0')}h ${String(mins).padStart(2, '0')}m`;
