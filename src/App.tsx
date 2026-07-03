@@ -2192,7 +2192,7 @@ function ItineraryDetailView({
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-8">
               <div>
-                <h2 className="text-4xl font-black mono mb-1">{itinerary.reliabilityScore}/10</h2>
+                <h2 className="text-4xl font-black mono mb-1">{itinerary.reliabilityScore.toFixed(2)}/10</h2>
                 <p className="text-white/60 font-bold uppercase tracking-[0.2em] text-xs">Route Reliability Score</p>
                 {searchDate && (
                   <div className="flex items-center gap-2 mt-2 text-accent">
@@ -2244,7 +2244,7 @@ function ItineraryDetailView({
               <span className="text-[10px] font-bold uppercase tracking-widest">Connection Risk Assessment</span>
             </div>
             <div className="text-center py-6">
-              <div className="text-5xl font-black mono text-white mb-2">{itinerary.connectionRiskValue}%</div>
+              <div className="text-5xl font-black mono text-white mb-2">{Math.round(itinerary.connectionRiskValue)}%</div>
               <p className="text-white/70 text-[10px] font-bold uppercase tracking-widest">Probability of Missed Connection</p>
             </div>
             <div className="space-y-4 mt-6">
