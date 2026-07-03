@@ -173,6 +173,9 @@ export const LiveFlightView: React.FC<LiveFlightViewProps> = ({ isDemoMode = fal
               <div>
                 <h3 className="text-xl font-black mono text-white">{tracking.flightNumber}</h3>
                 <p className="text-xs text-white/60 font-bold">{tracking.airline}</p>
+                <div className="flex gap-4 mt-1 text-[10px] text-white/50">
+                  <span>{formatTime(tracking.origin.time)} → {formatTime(tracking.destination.time)}</span>
+                </div>
               </div>
             </div>
             <Badge 
@@ -299,6 +302,22 @@ export const LiveFlightView: React.FC<LiveFlightViewProps> = ({ isDemoMode = fal
               </div>
             </div>
           </Card>
+
+          {/* Key Metrics */}
+          <div className="grid grid-cols-3 gap-4">
+            <div className="text-center p-4 bg-white/5 rounded-lg border border-white/10">
+              <div className="text-[10px] text-white/50 font-bold uppercase tracking-tighter mb-1">Altitude</div>
+              <div className="text-lg font-black mono text-accent">{tracking.altitude.toLocaleString()} ft</div>
+            </div>
+            <div className="text-center p-4 bg-white/5 rounded-lg border border-white/10">
+              <div className="text-[10px] text-white/50 font-bold uppercase tracking-tighter mb-1">Ground Speed</div>
+              <div className="text-lg font-black mono text-accent">{tracking.speed} kph</div>
+            </div>
+            <div className="text-center p-4 bg-white/5 rounded-lg border border-white/10">
+              <div className="text-[10px] text-white/50 font-bold uppercase tracking-tighter mb-1">ETA</div>
+              <div className="text-lg font-black mono text-accent">{formatTime(tracking.estimatedArrival)}</div>
+            </div>
+          </div>
         </motion.div>
       )}
 
