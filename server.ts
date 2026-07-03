@@ -34,124 +34,6 @@ interface LiveFlightData {
   estimatedArrival: string;
 }
 
-// Real Flight Data - Hybrid approach with multiple fallbacks
-async function fetchRealFlightData(flightNumber: string): Promise<LiveFlightData | null> {
-  const cleanFlight = flightNumber.toUpperCase().trim();
-  
-  try {
-    console.log(`Fetching real flight data for ${cleanFlight}`);
-    
-    // Use Gemini to search for real flight info (web search enabled)
-    // This is more reliable than direct API calls
-    const response = await withTimeout(
-      retryWithBackoff(() => ai.models.generateContent({
-        model: "gemini-3.1-flash-lite",
-        contents: `Search the web for real-time flight tracking information for flight number: ${cleanFlight}
-
-Look for:
-1. Current flight status (IN AIR, SCHEDULED, LANDED, DELAYED)
-2. Current altitude and speed (if in air)
-3. Departure and arrival airports
-4. Current time and position
-5. Aircraft details
-
-Return ONLY the most current, real data found. If the flight is not currently available in tracking systems, return null.
-Format as JSON.`,
-        config: {
-          tools: [{ googleSearch: {} }],
-          responseMimeType: "application/json",
-          responseSchema: {
-            type: Type.OBJECT,
-            properties: {
-              found: { type: Type.BOOLEAN },
-              flightNumber: { type: Type.STRING },
-              airline: { type: Type.STRING },
-              status: { type: Type.STRING },
-              altitude: { type: Type.NUMBER },
-              speed: { type: Type.NUMBER },
-              fromAirport: { type: Type.STRING },
-              toAirport: { type: Type.STRING },
-              aircraft: { type: Type.STRING },
-              progress: { type: Type.NUMBER }
-            }
-          }
-        }
-      })),
-      8000,
-      "Flight search timed out"
-    );
-
-    const text = response.text || "null";
-    const searchResult = JSON.parse(text);
-
-    if (searchResult && searchResult.found) {
-      console.log(`Found real flight data for ${cleanFlight}:`, searchResult);
-      
-      return {
-        flightNumber: searchResult.flightNumber || cleanFlight,
-        airline: searchResult.airline || extractAirlineFromCallsign(cleanFlight),
-        origin: {
-          airport: searchResult.fromAirport || 'UNKNOWN',
-          city: 'Unknown',
-          time: new Date().toISOString(),
-          terminal: '-',
-          gate: '-'
-        },
-        destination: {
-          airport: searchResult.toAirport || 'UNKNOWN',
-          city: 'Unknown',
-          time: new Date(Date.now() + 3600000).toISOString(),
-          terminal: '-',
-          gate: '-'
-        },
-        status: (searchResult.status || 'SCHEDULED') as 'IN AIR' | 'SCHEDULED' | 'LANDED' | 'DELAYED',
-        progress: Math.min(100, Math.max(0, searchResult.progress || 0)),
-        altitude: searchResult.altitude || 0,
-        speed: searchResult.speed || 0,
-        aircraft: {
-          model: searchResult.aircraft || 'Unknown',
-          age: 'Unknown',
-          registration: cleanFlight
-        },
-        estimatedArrival: new Date(Date.now() + 3600000).toISOString()
-      };
-    }
-
-    console.log(`No real flight data found for ${cleanFlight}`);
-    return null;
-  } catch (err: any) {
-    console.error("Real flight data fetch error:", err.message);
-    return null;
-  }
-}
-
-function extractAirlineFromCallsign(callsign: string): string {
-  // Extract airline code from callsign (first 2-3 letters usually)
-  const airlineMap: Record<string, string> = {
-    'MH': 'Malaysia Airlines',
-    'AK': 'AirAsia',
-    'SQ': 'Singapore Airlines',
-    'OD': 'Batik Air',
-    'FY': 'Firefly',
-    'HO': 'Juneyao Airlines',
-    'TG': 'Thai Airways',
-    'VN': 'Vietnam Airlines',
-    'CX': 'Cathay Pacific',
-    'NH': 'ANA',
-    'TK': 'Turkish Airlines',
-    'EK': 'Emirates',
-    'QR': 'Qatar Airways',
-    'CA': 'Air China',
-    'BA': 'British Airways',
-    'AF': 'Air France',
-    'KL': 'KLM',
-    'LH': 'Lufthansa'
-  };
-  
-  const code = callsign.substring(0, 2).toUpperCase();
-  return airlineMap[code] || 'Unknown Airline';
-}
-
 // Helper for retrying transient Gemini API errors (e.g. 503, 429)
 async function retryWithBackoff<T>(fn: () => Promise<T>, retries = 2, delay = 500): Promise<T> {
   try {
@@ -727,19 +609,12 @@ app.post("/api/track", async (req, res) => {
   console.log(`Tracking flight: ${flightNumber}`);
 
   try {
-    // Try to fetch real flight data from OpenSky Network
-    const realFlightData = await fetchRealFlightData(flightNumber);
-    
-    if (realFlightData) {
-      console.log(`Successfully fetched real flight data for ${flightNumber}`);
-      return res.json(realFlightData);
-    }
-
-    console.log(`No real data found for ${flightNumber}, using simulated data`);
-    res.json(generateSimulatedTrack(flightNumber));
+    // Use simulated but realistic flight data
+    const flightData = generateSimulatedTrack(flightNumber);
+    console.log(`Returning simulated flight data for ${flightNumber}`);
+    res.json(flightData);
   } catch (err: any) {
     console.error("Server API track flight error:", err);
-    console.log("Falling back to simulated flight status due to error.");
     res.json(generateSimulatedTrack(flightNumber));
   }
 });
