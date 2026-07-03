@@ -107,10 +107,10 @@ const DEMO_ITINERARIES: Itinerary[] = [
   }
 ];
 
-export async function searchFlight(query: string, useDemo: boolean = false): Promise<Itinerary[]> {
+export async function searchFlight(query: string, useDemo: boolean = false, departureDate?: string): Promise<Itinerary[]> {
   if (useDemo) return DEMO_ITINERARIES;
   
-  const cacheKey = `search_${query.toLowerCase().replace(/\s+/g, '_')}`;
+  const cacheKey = `search_${query.toLowerCase().replace(/\s+/g, '_')}_${departureDate || 'nodate'}`;
   const cachedData = getFromCache(cacheKey);
   if (cachedData) return cachedData;
 
@@ -118,7 +118,7 @@ export async function searchFlight(query: string, useDemo: boolean = false): Pro
     const res = await fetch("/api/search", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ query }),
+      body: JSON.stringify({ query, departureDate }),
     });
 
     if (!res.ok) {

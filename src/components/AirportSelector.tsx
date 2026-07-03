@@ -33,14 +33,14 @@ export function AirportSelector({ label, value, onChange, icon, placeholder }: A
     <div className="relative">
       <div 
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-10 cursor-pointer focus:outline-none focus:ring-2 focus:ring-accent/50 hover:border-accent/50 transition-all group relative"
+        className="w-full bg-white/3 border border-white/5 rounded-lg py-3 pl-10 pr-8 cursor-pointer focus:outline-none focus:ring-2 focus:ring-accent/50 hover:border-accent/30 transition-all group relative"
       >
         <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted group-hover:text-accent transition-colors">
           {icon}
         </div>
         <div className="flex flex-col">
-          <span className="text-[10px] text-muted uppercase font-bold tracking-widest leading-none mb-1">{label}</span>
-          <span className={cn("text-sm mono truncate", !value && "text-muted/50")}>
+          <span className="text-xs text-white/70 uppercase font-bold tracking-widest leading-none mb-1">{label}</span>
+          <span className={cn("text-sm font-semibold mono truncate", !value && "text-white/50")}>
             {selectedAirport ? `${selectedAirport.city} (${selectedAirport.code})` : placeholder}
           </span>
         </div>

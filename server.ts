@@ -119,6 +119,12 @@ function getPriceRange(originCode: string, destCode: string): { min: number; max
     "BKK_KUL": { min: 400, max: 950 },
     "SIN_NRT": { min: 900, max: 2400 },
     "NRT_SIN": { min: 900, max: 2400 },
+    "KUL_PEK": { min: 700, max: 2000 },
+    "PEK_KUL": { min: 700, max: 2000 },
+    "SIN_PEK": { min: 750, max: 2100 },
+    "PEK_SIN": { min: 750, max: 2100 },
+    "KUL_PVG": { min: 600, max: 1800 },
+    "PVG_KUL": { min: 600, max: 1800 },
 
     // Extra long-haul routes (4000km+) - Europe/Middle East
     "KUL_LHR": { min: 1800, max: 4500 },
@@ -182,6 +188,10 @@ function generateSimulatedSearch(query: string, departureDate?: string) {
       "KUCHING": { code: "KCH", city: "Kuching" },
       "BKK": { code: "BKK", city: "Bangkok" },
       "BANGKOK": { code: "BKK", city: "Bangkok" },
+      "PEK": { code: "PEK", city: "Beijing" },
+      "BEIJING": { code: "PEK", city: "Beijing" },
+      "PVG": { code: "PVG", city: "Shanghai" },
+      "SHANGHAI": { code: "PVG", city: "Shanghai" },
     };
 
     if (airportMap[rawOrigin]) {
@@ -474,19 +484,23 @@ app.post("/api/search", async (req, res) => {
         - Different connection patterns (direct and layovers mixed)
         
         Generate 4-5 diverse flight itineraries with:
-        ✓ Random price ranges - REALISTIC: Short-haul RM200-600, Medium RM800-2500, Long-haul KL-London RM1800-4500
+        ✓ REALISTIC Malaysian flight prices (NOT inflated):
+          - Domestic short-haul (KUL-SIN, KUL-PEN, etc): RM100-350
+          - Regional medium (KUL-Bangkok, KUL-HK, etc): RM300-900
+          - Asia-Pacific long (KUL-Tokyo, KUL-Beijing, etc): RM600-2000
+          - International long-haul (KUL-London, KUL-Europe): RM1500-4000
         ✓ Different airlines (randomly selected)
         ✓ Various departure times (${6 + timeVariation}:00 - ${22 + timeVariation}:00)
         ✓ Mix of direct and connection flights
         ✓ Varied reliability scores (some high 9+, some medium 6-7, some lower 5-6)
         ✓ Different disruption probabilities
         
-        Example variation patterns for each search:
-        1. Direct flight - Premium price RM${350 + Math.random() * 150} - Airline A - High reliability
-        2. Budget option - Low price RM${100 + Math.random() * 80} - Different Airline - Moderate reliability  
-        3. Connection - Mid price RM${200 + Math.random() * 150} - Different Airline - Mixed reliability
-        4. Early morning - Various price RM${150 + Math.random() * 200} - Different Airline - Random reliability
-        5. Late night - Varied price RM${80 + Math.random() * 120} - Different Airline - Random reliability
+        Example variation patterns for domestic/regional search:
+        1. Direct flight - Premium price RM${150} - Airline A - High reliability
+        2. Budget option - Low price RM${80} - Different Airline - Moderate reliability  
+        3. Connection - Mid price RM${120} - Different Airline - Mixed reliability
+        4. Early morning - Various price RM${100} - Different Airline - Random reliability
+        5. Late night - Varied price RM${90} - Different Airline - Random reliability
         
         Airline pool to randomly select from:
         Malaysia Airlines, AirAsia, Singapore Airlines, Batik Air, Firefly, Thai Airways, 
@@ -560,6 +574,12 @@ app.post("/api/search", async (req, res) => {
         itinerary.legs.every((leg: any) => leg && leg.departure && leg.arrival)
       );
     });
+
+    // If AI returned empty results, fallback to simulated
+    if (data.length === 0) {
+      console.log("Gemini returned empty results. Falling back to simulated search results.");
+      return res.json(generateSimulatedSearch(query, departureDate));
+    }
 
     res.json(data);
   } catch (err: any) {

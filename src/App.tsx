@@ -24,8 +24,9 @@ import {
   Calendar,
   Lock,
   ShieldAlert,
+  ChevronDown,
 } from 'lucide-react';
-import { format, parseISO } from 'date-fns';
+import { format, parseISO, addMonths, addDays } from 'date-fns';
 import { searchFlight, Itinerary, FlightLeg } from './services/flightService';
 import { Card, Badge } from './components/UI';
 import { AirportSelector } from './components/AirportSelector';
@@ -59,10 +60,22 @@ import {
 } from 'firebase/firestore';
 
 export default function App() {
+  const [showSplash, setShowSplash] = useState(true);
+  const [tripType, setTripType] = useState<'oneway' | 'return' | 'multicity'>('oneway');
+  const [showTripTypeMenu, setShowTripTypeMenu] = useState(false);
+  
   const [origin, setOrigin] = useState('');
   const [destination, setDestination] = useState('');
   const [date, setDate] = useState(format(new Date(), 'yyyy-MM-dd'));
+  const [returnDate, setReturnDate] = useState(format(addMonths(new Date(), 1), 'yyyy-MM-dd'));
+  
+  // Multi-city state
+  const [multiCityLegs, setMultiCityLegs] = useState<Array<{id: string; origin: string; destination: string; date: string}>>([
+    { id: '1', origin: '', destination: '', date: format(new Date(), 'yyyy-MM-dd') },
+    { id: '2', origin: '', destination: '', date: format(addDays(new Date(), 1), 'yyyy-MM-dd') }
+  ]);
   const [itineraries, setItineraries] = useState<Itinerary[]>([]);
+  const [returnItineraries, setReturnItineraries] = useState<Itinerary[]>([]);
   const [selectedItinerary, setSelectedItinerary] = useState<Itinerary | null>(null);
   const [loading, setLoading] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
@@ -104,6 +117,13 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    const splashTimer = setTimeout(() => {
+      setShowSplash(false);
+    }, 3000);
+    return () => clearTimeout(splashTimer);
+  }, []);
+
+  useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       setIsAuthLoading(false);
@@ -129,15 +149,57 @@ export default function App() {
   }, [user]);
 
   const handleSearch = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    if (!origin.trim() || !destination.trim()) return;
+    if (e) {
+      e.preventDefault();
+    } else {
+      return;
+    }
+    
+    if (tripType === 'multicity') {
+      // Validate multi-city legs
+      if (multiCityLegs.some(leg => !leg.origin || !leg.destination || !leg.date)) {
+        setError("Please select departure, destination, and travel date for all legs");
+        return;
+      }
+    } else {
+      // Validate regular trips
+      if (!origin.trim() || !destination.trim() || !date) {
+        setError("Please select departure, destination, and travel date");
+        return;
+      }
+
+      if (tripType === 'return' && !returnDate) {
+        setError("Please select return date");
+        return;
+      }
+    }
     
     setLoading(true);
     setIsSearching(true);
     setError(null);
     try {
-      const results = await searchFlight(`${origin} to ${destination} on ${date}`, isDemoMode);
-      setItineraries(results);
+      if (tripType === 'multicity') {
+        // Search for multi-city flights
+        const allResults: Itinerary[] = [];
+        for (const leg of multiCityLegs) {
+          const results = await searchFlight(`${leg.origin} to ${leg.destination} on ${leg.date}`, isDemoMode, leg.date);
+          allResults.push(...results);
+        }
+        setItineraries(allResults);
+        setReturnItineraries([]);
+      } else {
+        // Search outbound flight
+        const outboundResults = await searchFlight(`${origin} to ${destination} on ${date}`, isDemoMode, date);
+        setItineraries(outboundResults);
+
+        // If return trip, also search return flight
+        if (tripType === 'return') {
+          const returnResults = await searchFlight(`${destination} to ${origin} on ${returnDate}`, isDemoMode, returnDate);
+          setReturnItineraries(returnResults);
+        } else {
+          setReturnItineraries([]);
+        }
+      }
     } catch (err: any) {
       if (err.message === "RATE_LIMIT_EXCEEDED") {
         setError("RATE_LIMIT");
@@ -152,24 +214,42 @@ export default function App() {
   const enableDemoMode = () => {
     setIsDemoMode(true);
     setError(null);
-    handleSearch();
-  };
-
-  useEffect(() => {
-    const init = async () => {
+    // Manually trigger search without needing form event
+    const doSearch = async () => {
+      if (!origin.trim() || !destination.trim()) return;
       setLoading(true);
-      setError(null);
+      setIsSearching(true);
       try {
-        const results = await searchFlight("Popular routes from KUL");
+        const results = await searchFlight(`${origin} to ${destination} on ${date}`, true, date);
         setItineraries(results);
       } catch (err: any) {
-        console.warn("Initial search failed", err);
-        // Don't set global error for background init, just log it
+        if (err.message === "RATE_LIMIT_EXCEEDED") {
+          setError("RATE_LIMIT");
+        } else {
+          setError("An error occurred while searching for flights.");
+        }
       } finally {
         setLoading(false);
       }
     };
-    init();
+    doSearch();
+  };
+
+  useEffect(() => {
+    // Don't auto-search on mount - wait for user to click search button
+    // const init = async () => {
+    //   setLoading(true);
+    //   setError(null);
+    //   try {
+    //     const results = await searchFlight("Popular routes from KUL");
+    //     setItineraries(results);
+    //   } catch (err: any) {
+    //     console.warn("Initial search failed", err);
+    //   } finally {
+    //     setLoading(false);
+    //   }
+    // };
+    // init();
   }, []);
 
   const filteredItineraries = itineraries.filter(itinerary => {
@@ -187,12 +267,38 @@ export default function App() {
     // Time of day filter
     if (filterTimeOfDay === 'morning' && (depHour < 6 || depHour >= 12)) return false;
     if (filterTimeOfDay === 'afternoon' && (depHour < 12 || depHour >= 18)) return false;
-    if (filterTimeOfDay === 'evening' && (depHour < 18 && depHour >= 6)) return false; // Simple evening logic
+    if (filterTimeOfDay === 'evening' && (depHour < 18 || depHour >= 24)) return false; // Evening: 6 PM to midnight
 
     return true;
   });
 
   const sortedItineraries = [...filteredItineraries].sort((a, b) => {
+    if (sortBy === 'reliability') return b.reliabilityScore - a.reliabilityScore;
+    return a.price - b.price;
+  });
+
+  // Apply same filtering to return itineraries
+  const filteredReturnItineraries = returnItineraries.filter(itinerary => {
+    if (!itinerary || !itinerary.legs || !Array.isArray(itinerary.legs) || itinerary.legs.length === 0) return false;
+    const firstLeg = itinerary.legs[0];
+    if (!firstLeg || !firstLeg.departure || !firstLeg.departure.scheduled) return false;
+    const depHour = parseISO(firstLeg.departure.scheduled).getHours();
+    
+    // Airline filter
+    if (filterAirline && !itinerary.legs.some(leg => leg && leg.airline === filterAirline)) return false;
+    
+    // Stops filter
+    if (filterStops !== null && (itinerary.legs.length - 1) !== filterStops) return false;
+    
+    // Time of day filter
+    if (filterTimeOfDay === 'morning' && (depHour < 6 || depHour >= 12)) return false;
+    if (filterTimeOfDay === 'afternoon' && (depHour < 12 || depHour >= 18)) return false;
+    if (filterTimeOfDay === 'evening' && (depHour < 18 || depHour >= 24)) return false;
+
+    return true;
+  });
+
+  const sortedReturnItineraries = [...filteredReturnItineraries].sort((a, b) => {
     if (sortBy === 'reliability') return b.reliabilityScore - a.reliabilityScore;
     return a.price - b.price;
   });
@@ -466,13 +572,153 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-background text-foreground selection:bg-accent selection:text-white overflow-x-hidden">
+      {/* Loading Modal */}
+      <AnimatePresence>
+        {loading && (
+          <>
+            {/* Blurred Background */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[100] bg-black/40 backdrop-blur-sm"
+            />
+            
+            {/* Modal */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="fixed inset-0 z-[101] flex items-center justify-center"
+            >
+              <div className="bg-background border border-white/10 rounded-2xl p-8 shadow-2xl max-w-md w-[90%]">
+                <div className="flex flex-col items-center gap-6">
+                  {/* Wireframe Globe with Plane */}
+                  <div className="relative w-48 h-48">
+                    {/* Wireframe Globe - Rotating circles */}
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                      className="absolute inset-0 flex items-center justify-center"
+                    >
+                      <svg viewBox="0 0 100 100" className="w-full h-full">
+                        <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" strokeWidth="0.5" className="text-accent/40" />
+                        <circle cx="50" cy="50" r="35" fill="none" stroke="currentColor" strokeWidth="0.5" className="text-accent/30" />
+                        <circle cx="50" cy="50" r="25" fill="none" stroke="currentColor" strokeWidth="0.5" className="text-accent/20" />
+                      </svg>
+                    </motion.div>
+
+                    {/* Plane traveling in circular orbit around earth */}
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+                      className="absolute inset-0 flex items-center justify-center"
+                    >
+                      <div className="absolute w-32 h-32">
+                        <motion.div
+                          className="absolute top-0 left-1/2 -translate-x-1/2"
+                          animate={{ scale: [1, 1.1, 1] }}
+                          transition={{ duration: 1.5, repeat: Infinity }}
+                        >
+                          {/* Wireframe Plane SVG */}
+                          <svg viewBox="0 0 30 30" className="w-8 h-8 text-accent/80">
+                            {/* Fuselage */}
+                            <line x1="15" y1="5" x2="15" y2="25" stroke="currentColor" strokeWidth="1" />
+                            {/* Cockpit */}
+                            <circle cx="15" cy="6" r="2" fill="none" stroke="currentColor" strokeWidth="0.8" />
+                            {/* Main Wings */}
+                            <line x1="5" y1="15" x2="25" y2="15" stroke="currentColor" strokeWidth="1" />
+                            {/* Tail Wings */}
+                            <line x1="10" y1="23" x2="20" y2="23" stroke="currentColor" strokeWidth="0.8" />
+                            {/* Wing tips */}
+                            <circle cx="5" cy="15" r="1.5" fill="none" stroke="currentColor" strokeWidth="0.8" />
+                            <circle cx="25" cy="15" r="1.5" fill="none" stroke="currentColor" strokeWidth="0.8" />
+                          </svg>
+                        </motion.div>
+                      </div>
+                    </motion.div>
+
+                    {/* Center wireframe sphere */}
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <svg viewBox="0 0 60 60" className="w-14 h-14">
+                        <circle cx="30" cy="30" r="18" fill="none" stroke="currentColor" strokeWidth="0.8" className="text-accent/70" />
+                        <line x1="12" y1="30" x2="48" y2="30" stroke="currentColor" strokeWidth="0.6" className="text-accent/50" />
+                        <line x1="30" y1="12" x2="30" y2="48" stroke="currentColor" strokeWidth="0.6" className="text-accent/50" />
+                      </svg>
+                    </div>
+                  </div>
+
+                  {/* Text */}
+                  <div className="text-center space-y-2">
+                    <h3 className="text-xl font-bold text-white tracking-tight">Searching Flights</h3>
+                    <p className="text-xs text-white/60">Finding the best options for you...</p>
+                  </div>
+
+                  {/* Simple loading bar */}
+                  <div className="w-full h-0.5 bg-white/10 rounded-full overflow-hidden">
+                    <motion.div
+                      initial={{ width: "0%" }}
+                      animate={{ width: "100%" }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                      className="h-full bg-accent"
+                    />
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {showSplash && (
+          <motion.div
+            key="splash"
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+            className="fixed inset-0 z-[9999] bg-slate-950 flex flex-col items-center justify-center"
+          >
+            {/* Background Glow on Splash */}
+            <div className="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] bg-accent/15 blur-[120px] rounded-full pointer-events-none" />
+            <div className="fixed bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-500/5 blur-[120px] rounded-full pointer-events-none" />
+            
+            {/* Logo */}
+            <div className="relative z-10 flex flex-col items-center gap-8">
+              <motion.div
+                animate={{ scale: [1, 1.1, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+                className="w-20 h-20 bg-accent rounded-2xl flex items-center justify-center shadow-2xl shadow-accent/30"
+              >
+                <Plane className="w-12 h-12 text-white -rotate-45" />
+              </motion.div>
+              
+              <div className="text-center">
+                <h1 className="text-4xl font-black text-white tracking-tight mb-2">Smart Flight</h1>
+                <p className="text-accent text-sm font-bold uppercase tracking-widest">Initializing Decision Support...</p>
+              </div>
+
+              {/* Loading Bar */}
+              <motion.div
+                className="w-48 h-1 bg-white/10 rounded-full overflow-hidden mt-6"
+              >
+                <motion.div
+                  initial={{ width: "0%" }}
+                  animate={{ width: "100%" }}
+                  transition={{ duration: 3, ease: "easeInOut" }}
+                  className="h-full bg-gradient-to-r from-accent to-blue-500 rounded-full"
+                />
+              </motion.div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       {/* Background Glow */}
       <div className="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] bg-accent/10 blur-[120px] rounded-full pointer-events-none" />
       <div className="fixed bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-500/5 blur-[120px] rounded-full pointer-events-none" />
 
       {/* Top Navigation Bar */}
       <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-white/5">
-        <div className="max-w-4xl mx-auto px-4 h-20 flex items-center justify-between">
+        <div className="w-full px-4 h-20 flex items-center justify-between">
           <div 
             className="flex items-center gap-3 cursor-pointer" 
             onClick={() => { setActiveTab('search'); setSelectedItinerary(null); }}
@@ -483,7 +729,6 @@ export default function App() {
             </div>
             <div className="hidden sm:block">
               <h1 className="text-xl font-bold tracking-tight leading-none">Smart Flight</h1>
-              <p className="text-[8px] text-muted uppercase tracking-widest font-bold mt-1">Decision Support</p>
             </div>
           </div>
 
@@ -491,51 +736,51 @@ export default function App() {
             <button 
               onClick={() => { setActiveTab('search'); setSelectedItinerary(null); }}
               className={cn(
-                "flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all",
-                activeTab === 'search' ? "bg-accent text-white shadow-lg shadow-accent/20" : "text-muted hover:text-white hover:bg-white/5"
+                "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold uppercase tracking-widest transition-all",
+                activeTab === 'search' ? "bg-accent text-white shadow-lg shadow-accent/20" : "text-white hover:text-white hover:bg-white/5"
               )}
             >
               <Search className="w-3.5 h-3.5" />
-              <span className="text-[10px] font-bold uppercase tracking-widest">Search</span>
+              <span className="text-sm font-bold uppercase tracking-widest">Search</span>
             </button>
 
             <button 
               onClick={() => { setActiveTab('live'); setSelectedItinerary(null); }}
               className={cn(
-                "flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all",
-                activeTab === 'live' ? "bg-accent text-white shadow-lg shadow-accent/20" : "text-muted hover:text-white hover:bg-white/5"
+                "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold uppercase tracking-widest transition-all",
+                activeTab === 'live' ? "bg-accent text-white shadow-lg shadow-accent/20" : "text-white hover:text-white hover:bg-white/5"
               )}
             >
               <Activity className="w-3.5 h-3.5" />
-              <span className="text-[10px] font-bold uppercase tracking-widest">Live</span>
+              <span className="text-sm font-bold uppercase tracking-widest">Live</span>
             </button>
             
             <button 
               onClick={() => { setActiveTab('saved'); setSelectedItinerary(null); }}
               className={cn(
-                "flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all",
-                activeTab === 'saved' ? "bg-red-500 text-white shadow-lg shadow-red-500/20" : "text-muted hover:text-white hover:bg-white/5"
+                "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold uppercase tracking-widest transition-all",
+                activeTab === 'saved' ? "bg-red-500 text-white shadow-lg shadow-red-500/20" : "text-white hover:text-white hover:bg-white/5"
               )}
             >
               <Heart className={cn("w-3.5 h-3.5", activeTab === 'saved' && "fill-current")} />
-              <span className="text-[10px] font-bold uppercase tracking-widest">Saved</span>
+              <span className="text-sm font-bold uppercase tracking-widest">Saved</span>
             </button>
             
             <button 
               onClick={() => { setActiveTab('profile'); setSelectedItinerary(null); }}
               className={cn(
-                "flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all",
-                activeTab === 'profile' ? "bg-accent text-white shadow-lg shadow-accent/20" : "text-muted hover:text-white hover:bg-white/5"
+                "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold uppercase tracking-widest transition-all",
+                activeTab === 'profile' ? "bg-accent text-white shadow-lg shadow-accent/20" : "text-white hover:text-white hover:bg-white/5"
               )}
             >
               <UserIcon className="w-3.5 h-3.5" />
-              <span className="text-[10px] font-bold uppercase tracking-widest">Profile</span>
+              <span className="text-sm font-bold uppercase tracking-widest">Profile</span>
             </button>
           </div>
         </div>
       </nav>
 
-      <main className="max-w-4xl mx-auto px-4 py-12 relative z-10">
+      <main className="w-full px-4 py-12 relative z-10">
         <AnimatePresence mode="wait">
           {selectedItinerary ? (
             <ItineraryDetailView 
@@ -554,46 +799,259 @@ export default function App() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="space-y-12"
+              className="space-y-8"
             >
-              {/* Search Form */}
+              {/* Hero Section */}
+              <div className="text-center mb-8">
+                <motion.h2
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-4xl font-black text-white mb-3 tracking-tight"
+                >
+                  Find Your Perfect Flight
+                </motion.h2>
+                <motion.p
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 }}
+                  className="text-lg text-white/70"
+                >
+                  Intelligent flight search with reliability insights
+                </motion.p>
+              </div>
+
+              {/* Trip Type Dropdown */}
+              <div className="relative w-fit">
+                <motion.button
+                  onClick={() => setShowTripTypeMenu(!showTripTypeMenu)}
+                  className="px-6 py-3 rounded-2xl font-bold uppercase tracking-widest transition-all border-2 border-white/20 text-white hover:border-accent bg-white/5 hover:bg-white/10 flex items-center gap-3"
+                >
+                  {tripType === 'oneway' ? 'One Way' : tripType === 'return' ? 'Return' : 'Multi-city'}
+                  <ChevronDown className="w-5 h-5" />
+                </motion.button>
+
+                <AnimatePresence>
+                  {showTripTypeMenu && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                      className="absolute top-full left-0 mt-2 w-64 bg-white rounded-2xl shadow-2xl z-50 overflow-hidden"
+                    >
+                      <button
+                        onClick={() => {
+                          setTripType('oneway');
+                          setShowTripTypeMenu(false);
+                          setItineraries([]);
+                          setReturnItineraries([]);
+                          setIsSearching(false);
+                        }}
+                        className="w-full px-6 py-4 text-left hover:bg-slate-100 transition-colors flex items-center gap-4 text-slate-800"
+                      >
+                        <ArrowRight className="w-5 h-5 text-slate-600" />
+                        <div>
+                          <div className="font-bold text-lg">One way</div>
+                          <div className="text-sm text-slate-600">Single flight</div>
+                        </div>
+                      </button>
+                      <button
+                        onClick={() => {
+                          setTripType('return');
+                          setShowTripTypeMenu(false);
+                          setItineraries([]);
+                          setReturnItineraries([]);
+                          setIsSearching(false);
+                        }}
+                        className="w-full px-6 py-4 text-left hover:bg-slate-100 transition-colors flex items-center gap-4 text-slate-800 border-t border-slate-200"
+                      >
+                        <ArrowRightLeft className="w-5 h-5 text-slate-600" />
+                        <div>
+                          <div className="font-bold text-lg">Return</div>
+                          <div className="text-sm text-slate-600">Round trip</div>
+                        </div>
+                      </button>
+                      <button
+                        onClick={() => {
+                          setTripType('multicity');
+                          setShowTripTypeMenu(false);
+                          setItineraries([]);
+                          setReturnItineraries([]);
+                          setIsSearching(false);
+                        }}
+                        className="w-full px-6 py-4 text-left hover:bg-slate-100 transition-colors flex items-center gap-4 text-slate-800 border-t border-slate-200"
+                      >
+                        <Navigation className="w-5 h-5 text-slate-600" />
+                        <div>
+                          <div className="font-bold text-lg">Multi-city</div>
+                          <div className="text-sm text-slate-600">Multiple stops</div>
+                        </div>
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
               <header>
-                <form onSubmit={handleSearch} className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <AirportSelector 
-                      label="Origin"
-                      value={origin}
-                      onChange={setOrigin}
-                      icon={<MapPin className="w-4 h-4" />}
-                      placeholder="Select Departure"
-                    />
-                    <AirportSelector 
-                      label="Destination"
-                      value={destination}
-                      onChange={setDestination}
-                      icon={<Navigation className="w-4 h-4" />}
-                      placeholder="Select Arrival"
-                    />
-                    <CalendarSelector 
-                      label="Travel Date"
-                      value={date}
-                      onChange={setDate}
-                    />
-                  </div>
-                  <button 
-                    type="submit"
-                    disabled={loading}
-                    className="w-full bg-accent text-white py-4 rounded-2xl font-bold uppercase tracking-widest hover:bg-accent/80 hover:border-white/20 border border-accent transition-all shadow-lg shadow-accent/20 flex items-center justify-center gap-2"
-                  >
-                    {loading ? (
-                      <Activity className="w-5 h-5 animate-spin" />
+                <form 
+                  onSubmit={(e) => {
+                    // Only allow submission from the search button click
+                    if (e.nativeEvent.submitter?.type !== 'submit') {
+                      e.preventDefault();
+                      return;
+                    }
+                    e.preventDefault();
+                    handleSearch(e);
+                  }}
+                  onKeyPress={(e) => {
+                    // Prevent Enter key from submitting form
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                    }
+                  }}
+                  className="space-y-6">
+                  <div className="bg-white/5 border border-white/10 rounded-3xl p-6 space-y-4">
+                    {tripType !== 'multicity' ? (
+                      <div className="flex flex-wrap gap-4 items-end">
+                        <div className="flex-1 min-w-[200px]">
+                          <AirportSelector 
+                            label="From"
+                            value={origin}
+                            onChange={setOrigin}
+                            icon={<MapPin className="w-4 h-4" />}
+                            placeholder="Departure"
+                          />
+                        </div>
+                        <div className="flex-1 min-w-[200px]">
+                          <AirportSelector 
+                            label="To"
+                            value={destination}
+                            onChange={setDestination}
+                            icon={<Navigation className="w-4 h-4" />}
+                            placeholder="Arrival"
+                          />
+                        </div>
+                        <div className="flex-1 min-w-[200px]">
+                          <CalendarSelector 
+                            label="Depart"
+                            value={date}
+                            onChange={setDate}
+                            originCode={origin}
+                            destCode={destination}
+                            searchResults={itineraries}
+                          />
+                        </div>
+                        {tripType === 'return' && (
+                          <div className="flex-1 min-w-[200px]">
+                            <CalendarSelector 
+                              label="Return"
+                              value={returnDate}
+                              onChange={setReturnDate}
+                              originCode={destination}
+                              destCode={origin}
+                              searchResults={itineraries}
+                            />
+                          </div>
+                        )}
+                      </div>
                     ) : (
-                      <>
-                        <Search className="w-5 h-5" />
-                        Search Smart Itineraries
-                      </>
+                      <div className="space-y-4">
+                        {multiCityLegs.map((leg, index) => (
+                          <div key={leg.id} className="flex flex-wrap gap-3 items-end">
+                            <div className="flex-1 min-w-[180px]">
+                              <AirportSelector 
+                                label={index === 0 ? "From" : "From"}
+                                value={leg.origin}
+                                onChange={(value) => {
+                                  const newLegs = [...multiCityLegs];
+                                  newLegs[index].origin = value;
+                                  setMultiCityLegs(newLegs);
+                                }}
+                                icon={<MapPin className="w-4 h-4" />}
+                                placeholder="City or airport"
+                              />
+                            </div>
+                            <div className="flex-1 min-w-[180px]">
+                              <AirportSelector 
+                                label="To"
+                                value={leg.destination}
+                                onChange={(value) => {
+                                  const newLegs = [...multiCityLegs];
+                                  newLegs[index].destination = value;
+                                  setMultiCityLegs(newLegs);
+                                }}
+                                icon={<Navigation className="w-4 h-4" />}
+                                placeholder="City or airport"
+                              />
+                            </div>
+                            <div className="flex-1 min-w-[150px]">
+                              <CalendarSelector 
+                                label="Depart"
+                                value={leg.date}
+                                onChange={(value) => {
+                                  const newLegs = [...multiCityLegs];
+                                  newLegs[index].date = value;
+                                  setMultiCityLegs(newLegs);
+                                }}
+                                originCode={leg.origin}
+                                destCode={leg.destination}
+                                searchResults={[]}
+                              />
+                            </div>
+                            {multiCityLegs.length > 2 && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setMultiCityLegs(multiCityLegs.filter((_, i) => i !== index));
+                                }}
+                                className="px-3 py-2 bg-red-500/10 text-red-500 rounded-lg hover:bg-red-500/20 transition-all text-sm font-bold border border-red-500/30"
+                              >
+                                Remove
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const lastLeg = multiCityLegs[multiCityLegs.length - 1];
+                            setMultiCityLegs([
+                              ...multiCityLegs,
+                              {
+                                id: Date.now().toString(),
+                                origin: lastLeg.destination,
+                                destination: '',
+                                date: format(addDays(parseISO(lastLeg.date), 1), 'yyyy-MM-dd')
+                              }
+                            ]);
+                          }}
+                          className="px-4 py-2 bg-accent/20 text-accent border border-accent/30 rounded-lg hover:bg-accent/30 transition-all text-sm font-bold uppercase tracking-widest"
+                        >
+                          + Add Stop
+                        </button>
+                      </div>
                     )}
-                  </button>
+                    
+                    <button 
+                      type="submit"
+                      disabled={loading || (tripType === 'multicity' ? multiCityLegs.some(leg => !leg.origin || !leg.destination || !leg.date) : !origin || !destination || !date || (tripType === 'return' && !returnDate))}
+                      className="w-full bg-accent hover:bg-accent/80 disabled:bg-accent/50 disabled:cursor-not-allowed text-white font-bold uppercase tracking-widest px-8 py-3 rounded-xl transition-all shadow-lg shadow-accent/20 flex items-center justify-center gap-2"
+                    >
+                      {loading ? (
+                        <motion.div
+                          animate={{ rotate: 360 }}
+                          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                          className="w-5 h-5"
+                        >
+                          <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full" />
+                        </motion.div>
+                      ) : (
+                        <>
+                          <Search className="w-5 h-5" />
+                          Search
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </form>
 
                 {error === "RATE_LIMIT" && (
@@ -648,34 +1106,34 @@ export default function App() {
                   <div className="flex flex-col gap-1">
                     <button 
                       onClick={() => setSortBy('reliability')}
-                      className={cn("px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all border", 
+                      className={cn("px-5 py-2 rounded-full text-sm font-bold uppercase tracking-widest transition-all border", 
                         sortBy === 'reliability' ? "bg-accent text-white border-accent" : "bg-white/5 text-white/70 hover:bg-white/10 hover:border-accent/30 border-white/10")}
                     >
                       Reliability First
                     </button>
-                    <span className="text-[8px] text-white/50 ml-2">Prioritizes historical on-time performance</span>
+                    <span className="text-xs text-white/60 ml-2">Prioritizes historical on-time performance</span>
                   </div>
                   <div className="flex flex-col gap-1">
                     <button 
                       onClick={() => setSortBy('price')}
-                      className={cn("px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all border", 
+                      className={cn("px-5 py-2 rounded-full text-sm font-bold uppercase tracking-widest transition-all border", 
                         sortBy === 'price' ? "bg-accent text-white border-accent" : "bg-white/5 text-white/70 hover:bg-white/10 hover:border-accent/30 border-white/10")}
                     >
                       Lowest Price
                     </button>
-                    <span className="text-[8px] text-white/50 ml-2">Sorts by the most affordable fares</span>
+                    <span className="text-xs text-white/60 ml-2">Sorts by the most affordable fares</span>
                   </div>
                 </div>
 
                 {/* Advanced Filters UI */}
                 {itineraries.length > 0 && (
-                  <div className="flex flex-wrap gap-3 mt-6 p-4 bg-white/5 rounded-2xl border border-white/10">
-                    <div className="flex flex-col gap-1.5">
-                      <span className="text-[8px] font-black text-muted uppercase tracking-widest ml-1">Airline</span>
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-8 p-6 bg-white/5 rounded-3xl border border-white/10">
+                    <div className="flex flex-col gap-2">
+                      <span className="text-sm font-black text-white uppercase tracking-widest">Airline</span>
                       <select 
                         value={filterAirline}
                         onChange={(e) => setFilterAirline(e.target.value)}
-                        className="bg-background border border-white/10 rounded-lg px-3 py-1.5 text-[10px] mono focus:border-accent outline-none"
+                        className="bg-background border-2 border-white/20 rounded-xl px-4 py-3 text-base font-semibold text-white focus:border-accent outline-none transition-all hover:border-white/40"
                       >
                         <option value="">All Airlines</option>
                         {uniqueAirlines.map(airline => (
@@ -684,12 +1142,12 @@ export default function App() {
                       </select>
                     </div>
 
-                    <div className="flex flex-col gap-1.5">
-                      <span className="text-[8px] font-black text-muted uppercase tracking-widest ml-1">Stops</span>
+                    <div className="flex flex-col gap-2">
+                      <span className="text-sm font-black text-white uppercase tracking-widest">Stops</span>
                       <select 
                         value={filterStops === null ? "" : filterStops}
                         onChange={(e) => setFilterStops(e.target.value === "" ? null : parseInt(e.target.value))}
-                        className="bg-background border border-white/10 rounded-lg px-3 py-1.5 text-[10px] mono focus:border-accent outline-none"
+                        className="bg-background border-2 border-white/20 rounded-xl px-4 py-3 text-base font-semibold text-white focus:border-accent outline-none transition-all hover:border-white/40"
                       >
                         <option value="">Any Stops</option>
                         <option value="0">Non-stop</option>
@@ -698,12 +1156,12 @@ export default function App() {
                       </select>
                     </div>
 
-                    <div className="flex flex-col gap-1.5">
-                      <span className="text-[8px] font-black text-muted uppercase tracking-widest ml-1">Time</span>
+                    <div className="flex flex-col gap-2">
+                      <span className="text-sm font-black text-white uppercase tracking-widest">Time</span>
                       <select 
                         value={filterTimeOfDay || ""}
                         onChange={(e) => setFilterTimeOfDay(e.target.value as any || null)}
-                        className="bg-background border border-white/10 rounded-lg px-3 py-1.5 text-[10px] mono focus:border-accent outline-none"
+                        className="bg-background border-2 border-white/20 rounded-xl px-4 py-3 text-base font-semibold text-white focus:border-accent outline-none transition-all hover:border-white/40"
                       >
                         <option value="">Any Time</option>
                         <option value="morning">Morning (6am-12pm)</option>
@@ -718,7 +1176,7 @@ export default function App() {
                         setFilterStops(null);
                         setFilterTimeOfDay(null);
                       }}
-                      className="mt-auto text-[8px] font-bold text-accent hover:underline uppercase tracking-widest pb-2"
+                      className="text-sm font-black text-accent hover:text-white uppercase tracking-widest py-3 px-4 border-2 border-accent rounded-xl hover:bg-accent/20 transition-all"
                     >
                       Clear Filters
                     </button>
@@ -727,39 +1185,194 @@ export default function App() {
               </header>
 
               <div className="space-y-4">
-                <div className="flex items-center justify-between px-2">
-                  <div className="flex flex-col">
-                    <h2 className="text-sm font-bold uppercase tracking-widest text-white/60">
-                      {isSearching ? 'Recommended Itineraries' : 'Popular Routes'}
-                    </h2>
-                    {isSearching && (
-                      <div className="flex items-center gap-2 mt-1">
-                        <Calendar className="w-3 h-3 text-accent" />
-                        <span className="text-[10px] font-bold text-accent uppercase tracking-widest">
-                          {format(parseISO(date), 'EEE, dd MMM yyyy')}
-                        </span>
+                {tripType === 'return' && !loading && sortedItineraries.length > 0 ? (
+                  <>
+                    <div className="flex items-center justify-between px-2 mb-4">
+                      <div className="flex flex-col">
+                        <h2 className="text-lg font-bold uppercase tracking-widest text-white">
+                          Round Trip Combinations
+                        </h2>
+                        {isSearching && (
+                          <div className="flex items-center gap-2 mt-1">
+                            <Calendar className="w-3 h-3 text-accent" />
+                            <span className="text-sm font-bold text-white uppercase tracking-widest">
+                              {format(parseISO(date), 'EEE, dd MMM')} - {format(parseISO(returnDate), 'EEE, dd MMM')}
+                            </span>
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                  <span className="text-[10px] mono text-white/40">{sortedItineraries.length} OPTIONS FOUND</span>
-                </div>
-                
-                {sortedItineraries.map((itinerary) => (
-                  <ItineraryCard 
-                    key={itinerary.id} 
-                    itinerary={itinerary} 
-                    onClick={() => setSelectedItinerary(itinerary)} 
-                    onSave={(e) => { e.stopPropagation(); handleSaveItinerary(itinerary); }}
-                    isSaved={savedItineraries.some(s => s.itineraryId === itinerary.id)}
-                    searchDate={date}
-                  />
-                ))}
+                      <span className="text-sm mono text-white">{sortedItineraries.length * sortedReturnItineraries.length} COMBOS AVAILABLE</span>
+                    </div>
+
+                    <div className="space-y-6">
+                      {sortedItineraries.map((outboundItinerary, outboundIndex) => (
+                        <div key={`combo-${outboundItinerary.id}`} className="space-y-2">
+                          {/* Outbound Flight Header */}
+                          <div className="flex items-center px-2 py-2 bg-white/5 rounded-lg border border-white/10">
+                            <div className="flex-1">
+                              <p className="text-xs font-bold text-accent uppercase tracking-widest">OUTBOUND: {origin} → {destination}</p>
+                              <p className="text-[10px] text-white/60">{format(parseISO(date), 'EEE, dd MMM yyyy')}</p>
+                            </div>
+                          </div>
+
+                          {/* Outbound Flight Card */}
+                          <motion.div
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: outboundIndex * 0.05 }}
+                            whileHover={{ y: -2 }}
+                            className="ml-4"
+                          >
+                            <ItineraryCard 
+                              itinerary={outboundItinerary} 
+                              onClick={() => setSelectedItinerary(outboundItinerary)} 
+                              onSave={(e) => { e.stopPropagation(); handleSaveItinerary(outboundItinerary); }}
+                              isSaved={savedItineraries.some(s => s.itineraryId === outboundItinerary.id)}
+                              searchDate={date}
+                            />
+                          </motion.div>
+
+                          {/* Return Flights for this Outbound */}
+                          {sortedReturnItineraries.length > 0 && (
+                            <div className="space-y-2 mt-3">
+                              <div className="flex items-center px-2 py-2 bg-white/5 rounded-lg border border-white/10">
+                                <div className="flex-1">
+                                  <p className="text-xs font-bold text-accent uppercase tracking-widest">RETURN: {destination} → {origin}</p>
+                                  <p className="text-[10px] text-white/60">{format(parseISO(returnDate), 'EEE, dd MMM yyyy')}</p>
+                                </div>
+                              </div>
+
+                              <div className="space-y-2 ml-4">
+                                {sortedReturnItineraries.map((returnItinerary, returnIndex) => (
+                                  <motion.div
+                                    key={`return-${outboundItinerary.id}-${returnItinerary.id}`}
+                                    initial={{ opacity: 0, x: 20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: (outboundIndex + returnIndex) * 0.05 }}
+                                    whileHover={{ y: -2 }}
+                                  >
+                                    <ItineraryCard 
+                                      itinerary={returnItinerary} 
+                                      onClick={() => setSelectedItinerary(returnItinerary)} 
+                                      onSave={(e) => { e.stopPropagation(); handleSaveItinerary(returnItinerary); }}
+                                      isSaved={savedItineraries.some(s => s.itineraryId === returnItinerary.id)}
+                                      searchDate={returnDate}
+                                    />
+                                  </motion.div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Separator between combos */}
+                          {outboundIndex < sortedItineraries.length - 1 && (
+                            <div className="my-4 border-t border-white/5" />
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="flex items-center justify-between px-2">
+                      <div className="flex flex-col">
+                        <h2 className="text-lg font-bold uppercase tracking-widest text-white">
+                          {tripType === 'return' ? `Outbound: ${origin} → ${destination}` : isSearching ? 'Recommended Itineraries' : 'Popular Routes'}
+                        </h2>
+                        {isSearching && (
+                          <div className="flex items-center gap-2 mt-1">
+                            <Calendar className="w-3 h-3 text-accent" />
+                            <span className="text-sm font-bold text-white uppercase tracking-widest">
+                              {format(parseISO(date), 'EEE, dd MMM yyyy')}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      <span className="text-sm mono text-white">{sortedItineraries.length} OPTIONS FOUND</span>
+                    </div>
+                    
+                    {sortedItineraries.map((itinerary, index) => (
+                      <motion.div
+                        key={itinerary.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                        whileHover={{ y: -5, boxShadow: "0 20px 40px rgba(242, 125, 38, 0.2)" }}
+                      >
+                        <ItineraryCard 
+                          itinerary={itinerary} 
+                          onClick={() => setSelectedItinerary(itinerary)} 
+                          onSave={(e) => { e.stopPropagation(); handleSaveItinerary(itinerary); }}
+                          isSaved={savedItineraries.some(s => s.itineraryId === itinerary.id)}
+                          searchDate={date}
+                        />
+                      </motion.div>
+                    ))}
+                  </>
+                )}
 
                 {sortedItineraries.length === 0 && !loading && (
                   <div className="text-center py-20 bg-white/5 rounded-3xl border border-dashed border-white/10">
-                    <Plane className="w-12 h-12 text-white/10 mx-auto mb-4" />
-                    <p className="text-white/60">No itineraries found matching your filters.</p>
+                    <motion.div
+                      animate={{ y: [0, -10, 0] }}
+                      transition={{ duration: 3, repeat: Infinity }}
+                    >
+                      <Plane className="w-16 h-16 text-white/20 mx-auto mb-6" />
+                    </motion.div>
+                    <h3 className="text-xl font-bold text-white mb-2">No flights found</h3>
+                    <p className="text-white/60 mb-6">Try adjusting your filters or search dates</p>
+                    <div className="flex flex-wrap gap-3 justify-center">
+                      <button
+                        onClick={() => {
+                          setFilterAirline('');
+                          setFilterStops(null);
+                          setFilterTimeOfDay(null);
+                        }}
+                        className="px-6 py-2 bg-accent/20 text-accent rounded-lg hover:bg-accent/30 transition-all font-semibold"
+                      >
+                        Clear All Filters
+                      </button>
+                    </div>
                   </div>
+                )}
+
+                {loading && (
+                  <div className="space-y-4">
+                    {[1, 2, 3].map((i) => (
+                      <motion.div
+                        key={i}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.1 }}
+                        className="bg-white/3 border border-white/5 rounded-2xl p-6 h-32"
+                      >
+                        <div className="space-y-3">
+                          <motion.div
+                            animate={{ backgroundPosition: ['200% 0', '-200% 0'] }}
+                            transition={{ duration: 2, repeat: Infinity }}
+                            className="h-4 bg-gradient-to-r from-white/5 via-white/20 to-white/5 rounded w-1/3"
+                            style={{ backgroundSize: '200% 100%' }}
+                          />
+                          <motion.div
+                            animate={{ backgroundPosition: ['200% 0', '-200% 0'] }}
+                            transition={{ duration: 2, repeat: Infinity, delay: 0.2 }}
+                            className="h-4 bg-gradient-to-r from-white/5 via-white/20 to-white/5 rounded w-1/2"
+                            style={{ backgroundSize: '200% 100%' }}
+                          />
+                          <motion.div
+                            animate={{ backgroundPosition: ['200% 0', '-200% 0'] }}
+                            transition={{ duration: 2, repeat: Infinity, delay: 0.4 }}
+                            className="h-4 bg-gradient-to-r from-white/5 via-white/20 to-white/5 rounded w-1/4"
+                            style={{ backgroundSize: '200% 100%' }}
+                          />
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                )}
+
+                {!loading && sortedItineraries.length > 0 && (
+                  <div></div>
                 )}
               </div>
             </motion.div>
@@ -1361,15 +1974,50 @@ const ItineraryCard: React.FC<{
 
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center group-hover:bg-accent/10 transition-colors relative">
-              <div className="text-center">
-                <div className="text-[10px] font-black mono text-accent leading-none">{itinerary.reliabilityScore}</div>
-                <div className="text-[8px] text-white/80 font-bold uppercase">Score</div>
+            <div className={cn(
+              "relative flex items-center justify-center transition-all group-hover:scale-105",
+              "w-16 h-16"
+            )}>
+              {/* Score Card */}
+              <div className={cn(
+                "relative rounded-lg flex flex-col items-center justify-center w-full h-full border",
+                itinerary.reliabilityScore >= 9.5 
+                  ? "bg-green-950/40 border-green-700/50" 
+                  : itinerary.reliabilityScore >= 8.5 
+                  ? "bg-blue-950/40 border-blue-700/50"
+                  : itinerary.reliabilityScore >= 7
+                  ? "bg-amber-950/40 border-amber-700/50"
+                  : "bg-orange-950/40 border-orange-700/50"
+              )}>
+                <motion.div 
+                  animate={{ scale: [1, 1.02, 1] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className="text-center"
+                >
+                  <div className={cn(
+                    "font-black mono leading-none",
+                    itinerary.reliabilityScore >= 9.5 ? "text-2xl text-green-300" : itinerary.reliabilityScore >= 8.5 ? "text-2xl text-blue-300" : itinerary.reliabilityScore >= 7 ? "text-2xl text-amber-300" : "text-xl text-orange-300"
+                  )}>
+                    {itinerary.reliabilityScore.toFixed(2)}
+                  </div>
+                  <div className={cn(
+                    "text-[7px] font-black uppercase tracking-widest mt-0.5 leading-none",
+                    itinerary.reliabilityScore >= 9.5 ? "text-green-300" : itinerary.reliabilityScore >= 8.5 ? "text-blue-300" : itinerary.reliabilityScore >= 7 ? "text-amber-300" : "text-orange-300"
+                  )}>
+                    Score
+                  </div>
+                </motion.div>
               </div>
-              {itinerary.reliabilityScore >= 9 && itinerary.price < 1000 && (
-                <div className="absolute -top-2 -left-2 bg-accent text-white text-[6px] font-black px-1.5 py-0.5 rounded-full shadow-lg animate-bounce uppercase">
-                  Best Value
-                </div>
+
+              {/* Top Choice Badge */}
+              {itinerary.reliabilityScore >= 9.5 && (
+                <motion.div 
+                  animate={{ y: [0, -4, 0] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className="absolute -top-2 -right-2 bg-green-700 text-white text-[7px] font-black px-2 py-0.5 rounded-full shadow-sm shadow-green-900/40 uppercase tracking-tighter"
+                >
+                  ★ Best
+                </motion.div>
               )}
             </div>
             <div>
@@ -1391,9 +2039,9 @@ const ItineraryCard: React.FC<{
                     • {itinerary.legs.length - 1} Stop{itinerary.legs.length > 2 ? 's' : ''}
                   </span>
                 )}
-                {searchDate && (
+                {firstLeg && firstLeg.departure && firstLeg.departure.scheduled && (
                   <span className="text-[8px] text-white/60 uppercase font-bold flex items-center gap-1">
-                    • <Calendar className="w-2 h-2" /> {format(parseISO(searchDate), 'dd MMM')}
+                    • <Calendar className="w-2 h-2" /> {format(parseISO(firstLeg.departure.scheduled), 'dd MMM')}
                   </span>
                 )}
               </div>
