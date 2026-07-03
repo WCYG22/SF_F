@@ -231,25 +231,9 @@ export const LiveFlightView: React.FC<LiveFlightViewProps> = ({ isDemoMode = fal
                 </div>
 
                 <div className="text-center p-6 bg-white/3 rounded-xl border border-white/5">
-                  <div className="text-xs text-white/50 font-bold uppercase tracking-widest mb-2">Live Radar Active</div>
-                  <div className="w-full mb-4">
-                    <div className="h-2 bg-white/5 rounded-full relative overflow-hidden border border-white/10">
-                      <motion.div 
-                        initial={{ width: 0 }}
-                        animate={{ width: `${tracking.progress}%` }}
-                        className="absolute top-0 left-0 h-full bg-gradient-to-r from-accent via-accent to-accent/60 shadow-[0_0_15px_rgba(242,125,38,0.6)]"
-                      />
-                      <motion.div 
-                        animate={{ left: `${tracking.progress}%` }}
-                        className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2"
-                      >
-                        <div className="relative">
-                          <Plane className="w-4 h-4 text-white rotate-90 fill-accent relative z-10" />
-                        </div>
-                      </motion.div>
-                    </div>
-                  </div>
-                  <div className="text-4xl font-black mono text-accent">{tracking.progress}%</div>
+                  <div className="text-xs text-white/50 font-bold uppercase tracking-widest mb-4">Live Radar Active</div>
+                  <div className="text-5xl font-black mono text-accent mb-2">{tracking.progress}%</div>
+                  <div className="text-xs text-white/60 font-bold uppercase">Current Position</div>
                 </div>
 
                 <div className="text-center md:text-right p-6 bg-white/3 rounded-xl border border-white/5">
