@@ -595,6 +595,8 @@ app.post("/api/track", async (req, res) => {
     return res.status(400).json({ error: "Flight number is required" });
   }
 
+  console.log(`Tracking flight: ${flightNumber}`);
+
   // Fallback to simulated data directly if API key is not configured
   if (!process.env.GEMINI_API_KEY) {
     console.warn("GEMINI_API_KEY is not defined. Falling back to high-quality simulated flight tracker.");
@@ -602,17 +604,26 @@ app.post("/api/track", async (req, res) => {
   }
 
   try {
+    // Use web search to find REAL flight data
     const response = await withTimeout(
       retryWithBackoff(() => ai.models.generateContent({
         model: "gemini-3.1-flash-lite",
-        contents: `Search for the real-time status of flight ${flightNumber}. 
-        Provide current telemetry, aircraft details, and progress if the flight is currently in the air.
-        If the flight is scheduled or landed, provide the most recent or upcoming data.
-        
-        CRITICAL: All times (origin.time, destination.time, estimatedArrival) MUST be in the LOCAL TIME of the respective airport. 
-        For example, if a flight departs KUL (UTC+8) and arrives in HAN (UTC+7), the arrival time must be shown in HAN local time (UTC+7).
-        
-        Return a single LiveFlightData object.`,
+        contents: `CRITICAL: Find REAL flight tracking data for flight number: ${flightNumber}
+
+MUST search for ACTUAL real-time flight information. Do NOT generate or simulate data.
+
+Search for:
+1. Real-time position and status (FlightRadar24, Flight tracking sites)
+2. Current altitude, speed, and location
+3. Departure and arrival airports
+4. Aircraft type and registration
+5. Scheduled vs actual times
+6. Current flight status (IN AIR, SCHEDULED, LANDED, DELAYED)
+
+Return ONLY REAL data found from actual flight tracking sources.
+If flight is not currently tracked or data unavailable, return null.
+
+IMPORTANT: Return actual flight information, not made-up data.`,
         config: {
           tools: [{ googleSearch: {} }],
           responseMimeType: "application/json",
@@ -626,7 +637,7 @@ app.post("/api/track", async (req, res) => {
                 properties: {
                   airport: { type: Type.STRING },
                   city: { type: Type.STRING },
-                  time: { type: Type.STRING, description: "ISO 8601 timestamp in local time" },
+                  time: { type: Type.STRING },
                   terminal: { type: Type.STRING },
                   gate: { type: Type.STRING }
                 }
@@ -636,15 +647,15 @@ app.post("/api/track", async (req, res) => {
                 properties: {
                   airport: { type: Type.STRING },
                   city: { type: Type.STRING },
-                  time: { type: Type.STRING, description: "ISO 8601 timestamp in local time" },
+                  time: { type: Type.STRING },
                   terminal: { type: Type.STRING },
                   gate: { type: Type.STRING }
                 }
               },
               status: { type: Type.STRING, enum: ['IN AIR', 'SCHEDULED', 'LANDED', 'DELAYED'] },
-              progress: { type: Type.NUMBER, description: "Percentage of flight completed (0-100)" },
-              altitude: { type: Type.NUMBER, description: "Current altitude in feet" },
-              speed: { type: Type.NUMBER, description: "Current ground speed in km/h" },
+              progress: { type: Type.NUMBER },
+              altitude: { type: Type.NUMBER },
+              speed: { type: Type.NUMBER },
               aircraft: {
                 type: Type.OBJECT,
                 properties: {
@@ -653,22 +664,37 @@ app.post("/api/track", async (req, res) => {
                   registration: { type: Type.STRING }
                 }
               },
-              estimatedArrival: { type: Type.STRING, description: "ISO 8601 timestamp in local time" }
+              estimatedArrival: { type: Type.STRING }
             }
           }
         }
       })),
-      8000,
-      "Gemini flight tracker request timed out"
+      10000,
+      "Flight tracking request timed out"
     );
 
     const text = response.text || "null";
-    const data = JSON.parse(text);
-    res.json(data);
+    let data = null;
+    
+    try {
+      data = JSON.parse(text);
+    } catch (e) {
+      console.error("Failed to parse Gemini response:", text);
+      data = null;
+    }
+
+    // If we got real data back, use it
+    if (data && data.flightNumber) {
+      console.log(`Got real flight data for ${flightNumber}`);
+      return res.json(data);
+    }
+
+    // If no real data found, fall back to simulated
+    console.log(`No real data found for ${flightNumber}, using simulated data`);
+    res.json(generateSimulatedTrack(flightNumber));
   } catch (err: any) {
     console.error("Server API track flight error:", err);
-    // Graceful fallback to simulated tracking instead of failing the client tracking
-    console.log("Falling back to high-quality simulated flight status due to error.");
+    console.log("Falling back to simulated flight status due to error.");
     res.json(generateSimulatedTrack(flightNumber));
   }
 });
