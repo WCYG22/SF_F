@@ -230,6 +230,31 @@ export const LiveFlightView: React.FC<LiveFlightViewProps> = ({ isDemoMode = fal
                   </div>
                 </div>
 
+                <div className="flex flex-col items-center justify-center px-6 py-8 bg-accent/5 rounded-xl border border-accent/20">
+                  <div className="w-full mb-6">
+                    <div className="h-2 bg-white/5 rounded-full relative overflow-hidden border border-white/10">
+                      <motion.div 
+                        initial={{ width: 0 }}
+                        animate={{ width: `${tracking.progress}%` }}
+                        className="absolute top-0 left-0 h-full bg-gradient-to-r from-accent via-accent to-accent/60 shadow-[0_0_15px_rgba(242,125,38,0.6)]"
+                      />
+                      <motion.div 
+                        animate={{ left: `${tracking.progress}%` }}
+                        className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2"
+                      >
+                        <div className="relative">
+                          <div className="absolute inset-0 bg-accent/30 blur-md rounded-full" />
+                          <Plane className="w-5 h-5 text-white rotate-90 fill-accent relative z-10" />
+                        </div>
+                      </motion.div>
+                    </div>
+                  </div>
+                  <div className="text-center space-y-2">
+                    <div className="text-[10px] font-bold text-white/60 uppercase tracking-widest">Live Radar Active</div>
+                    <div className="text-4xl font-black mono text-accent">{tracking.progress}%</div>
+                  </div>
+                </div>
+
                 <div className="text-center md:text-right p-6 bg-white/3 rounded-xl border border-white/5">
                   <div className="text-xs text-white/50 font-bold uppercase tracking-widest mb-2">Arrival</div>
                   <div className="text-5xl font-black mono text-accent mb-2">{tracking.destination.airport}</div>
