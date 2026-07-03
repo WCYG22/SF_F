@@ -608,13 +608,90 @@ app.post("/api/track", async (req, res) => {
 
   console.log(`Tracking flight: ${flightNumber}`);
 
+  if (!process.env.GEMINI_API_KEY) {
+    console.warn("GEMINI_API_KEY not configured, using simulated data");
+    return res.json(generateSimulatedTrack(flightNumber));
+  }
+
   try {
-    // Use simulated but realistic flight data
-    const flightData = generateSimulatedTrack(flightNumber);
-    console.log(`Returning simulated flight data for ${flightNumber}`);
-    res.json(flightData);
+    // Use Gemini to generate realistic flight tracking data
+    const response = await withTimeout(
+      retryWithBackoff(() => ai.models.generateContent({
+        model: "gemini-3.1-flash-lite",
+        contents: `You are a flight tracking system. Generate realistic flight tracking data for flight number: ${flightNumber}
+
+Create data that looks like real aircraft telemetry:
+- Flight number: Use the provided flight number or generate a realistic one
+- Airline: Identify from flight number (MH=Malaysia Airlines, SQ=Singapore Airlines, AK=AirAsia, etc)
+- Status: Can be IN AIR, SCHEDULED, LANDED, or DELAYED
+- Altitude: If IN AIR, between 20000-43000 feet. If not IN AIR, 0 feet
+- Speed: If IN AIR, between 450-900 kph. If not IN AIR, 0 kph
+- Progress: 0-100% of route completion
+- Airports: Realistic airport codes (KUL, SIN, BKK, HAN, HKG, NRT, etc)
+- Times: Current time for current status
+
+Make it realistic and varied. Return ONLY valid JSON.`,
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+              flightNumber: { type: Type.STRING },
+              airline: { type: Type.STRING },
+              origin: {
+                type: Type.OBJECT,
+                properties: {
+                  airport: { type: Type.STRING },
+                  city: { type: Type.STRING },
+                  time: { type: Type.STRING },
+                  terminal: { type: Type.STRING },
+                  gate: { type: Type.STRING }
+                }
+              },
+              destination: {
+                type: Type.OBJECT,
+                properties: {
+                  airport: { type: Type.STRING },
+                  city: { type: Type.STRING },
+                  time: { type: Type.STRING },
+                  terminal: { type: Type.STRING },
+                  gate: { type: Type.STRING }
+                }
+              },
+              status: { type: Type.STRING, enum: ['IN AIR', 'SCHEDULED', 'LANDED', 'DELAYED'] },
+              progress: { type: Type.NUMBER },
+              altitude: { type: Type.NUMBER },
+              speed: { type: Type.NUMBER },
+              aircraft: {
+                type: Type.OBJECT,
+                properties: {
+                  model: { type: Type.STRING },
+                  age: { type: Type.STRING },
+                  registration: { type: Type.STRING }
+                }
+              },
+              estimatedArrival: { type: Type.STRING }
+            }
+          }
+        }
+      })),
+      8000,
+      "Gemini flight tracking request timed out"
+    );
+
+    const text = response.text || "null";
+    const data = JSON.parse(text);
+
+    if (data && data.flightNumber) {
+      console.log(`Generated flight data for ${flightNumber}:`, data);
+      return res.json(data);
+    }
+
+    console.log(`Gemini returned invalid data, using simulated`);
+    res.json(generateSimulatedTrack(flightNumber));
   } catch (err: any) {
-    console.error("Server API track flight error:", err);
+    console.error("Gemini flight tracking error:", err.message);
+    console.log("Falling back to simulated data");
     res.json(generateSimulatedTrack(flightNumber));
   }
 });
