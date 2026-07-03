@@ -254,14 +254,10 @@ export const LiveFlightView: React.FC<LiveFlightViewProps> = ({ isDemoMode = fal
                       </motion.div>
                     </div>
                   </div>
-                  <motion.div 
-                    animate={{ scale: [1, 1.05, 1] }}
-                    transition={{ duration: 1.5, repeat: Infinity }}
-                    className="text-center"
-                  >
-                    <div className="text-5xl font-black mono text-accent mb-1">{tracking.progress}%</div>
-                    <div className="text-[10px] font-bold text-white/60 uppercase tracking-widest">Journey Completed</div>
-                  </motion.div>
+                  <div className="text-center space-y-2">
+                    <div className="text-[10px] font-bold text-white/60 uppercase tracking-widest">Live Radar Active</div>
+                    <div className="text-5xl font-black mono text-accent">{tracking.progress}%</div>
+                  </div>
                 </div>
 
                 <div className="text-center md:text-right p-6 bg-white/3 rounded-xl border border-white/5">
