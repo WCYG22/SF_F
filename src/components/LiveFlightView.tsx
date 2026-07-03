@@ -235,67 +235,50 @@ export const LiveFlightView: React.FC<LiveFlightViewProps> = ({ isDemoMode = fal
           <div className="bg-white/5 rounded-2xl p-6 border border-white/10">
             <p className="text-xs text-white/50 font-bold uppercase tracking-tighter mb-6">Flight Progress</p>
             
-            {/* Timeline visualization */}
-            <div className="space-y-6">
-              {/* Stage indicators */}
-              <div className="flex items-end justify-between gap-3">
-                {statusStages.map((stage, idx) => {
-                  const { completed } = getFlightStatus(tracking.progress);
-                  const isActive = idx === completed;
-                  const isCompleted = idx < completed;
-                  const StageIcon = stage.icon;
-                  
-                  return (
-                    <div key={idx} className="flex flex-col items-center flex-1">
-                      <motion.div
-                        animate={{
-                          scale: isActive ? 1.2 : 1,
-                          opacity: isCompleted || isActive ? 1 : 0.4
-                        }}
-                        className={`flex items-center justify-center w-12 h-12 rounded-full mb-2 ${
-                          isCompleted ? 'bg-accent text-white' :
-                          isActive ? 'bg-accent/30 border-2 border-accent text-accent' :
-                          'bg-white/10 text-white/40'
-                        }`}
-                      >
-                        <StageIcon className="w-6 h-6" />
-                      </motion.div>
-                      <div className="text-sm font-bold text-white/60 text-center">
-                        {stage.name}
-                      </div>
-                      
-                      {idx < statusStages.length - 1 && (
-                        <div className={`absolute w-16 h-1 top-6 left-1/2 translate-x-2 ${
-                          idx < completed ? 'bg-accent' : 'bg-white/10'
-                        }`} style={{ width: 'calc((100% - 48px) / 5 + 24px)' }} />
-                      )}
+            {/* Stage indicators in a row */}
+            <div className="flex items-center justify-between mb-6 gap-2">
+              {statusStages.map((stage, idx) => {
+                const { completed } = getFlightStatus(tracking.progress);
+                const isActive = idx === completed;
+                const isCompleted = idx < completed;
+                const StageIcon = stage.icon;
+                
+                return (
+                  <div key={idx} className="flex flex-col items-center flex-1">
+                    <motion.div
+                      animate={{
+                        scale: isActive ? 1.2 : 1,
+                        opacity: isCompleted || isActive ? 1 : 0.4
+                      }}
+                      className={`flex items-center justify-center w-12 h-12 rounded-full mb-2 ${
+                        isCompleted ? 'bg-accent text-white' :
+                        isActive ? 'bg-accent/30 border-2 border-accent text-accent' :
+                        'bg-white/10 text-white/40'
+                      }`}
+                    >
+                      <StageIcon className="w-6 h-6" />
+                    </motion.div>
+                    <div className="text-sm font-bold text-white/60 text-center">
+                      {stage.name}
                     </div>
-                  );
-                })}
-              </div>
-              
-              {/* Connecting lines */}
-              <div className="flex items-center gap-1 px-2">
-                {statusStages.map((_, idx) => {
-                  const { completed } = getFlightStatus(tracking.progress);
-                  const isCompleted = idx < completed;
-                  
-                  if (idx === statusStages.length - 1) return null;
-                  
-                  return (
-                    <div key={`line-${idx}`} className="flex-1">
-                      <div className={`h-1 rounded-full ${
-                        isCompleted ? 'bg-accent' : 'bg-white/10'
-                      }`} />
-                    </div>
-                  );
-                })}
-              </div>
+                  </div>
+                );
+              })}
+            </div>
+            
+            {/* Progress line */}
+            <div className="flex items-center gap-1 mb-6 h-1 bg-white/10 rounded-full overflow-hidden">
+              <motion.div
+                initial={{ width: "0%" }}
+                animate={{ width: `${tracking.progress}%` }}
+                transition={{ duration: 1 }}
+                className="h-full bg-accent rounded-full"
+              />
             </div>
             
             {/* Current status */}
-            <div className="text-center mt-6 pt-4 border-t border-white/10">
-              <div className="text-2xl font-black text-accent">{getFlightStatus(tracking.progress).stage}</div>
+            <div className="text-center pt-2 border-t border-white/10">
+              <div className="text-2xl font-black text-accent mt-3">{getFlightStatus(tracking.progress).stage}</div>
               <div className="text-sm text-white/40 mt-2">{tracking.progress}% of route completed</div>
             </div>
           </div>
