@@ -422,6 +422,9 @@ export const LiveFlightView: React.FC<LiveFlightViewProps> = ({ isDemoMode = fal
                 <circle cx="380" cy="50" r="5" className="fill-white/30" />
                 <text x="380" y="75" className="fill-white/40 text-[9px] font-black mono tracking-tighter" textAnchor="middle">{tracking.destination.airport}</text>
 
+                {/* Center Text - Live Radar Active */}
+                <text x="200" y="28" className="fill-accent text-[10px] font-black mono tracking-widest" textAnchor="middle">LIVE RADAR ACTIVE</text>
+
                 {/* Moving Plane */}
                 <motion.g
                   initial={{ offsetDistance: "0%" }}
