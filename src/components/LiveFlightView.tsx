@@ -230,8 +230,9 @@ export const LiveFlightView: React.FC<LiveFlightViewProps> = ({ isDemoMode = fal
                   </div>
                 </div>
 
-                <div className="flex flex-col items-center justify-center px-6 py-8 bg-accent/5 rounded-xl border border-accent/20">
-                  <div className="w-full mb-6">
+                <div className="text-center p-6 bg-white/3 rounded-xl border border-white/5">
+                  <div className="text-xs text-white/50 font-bold uppercase tracking-widest mb-2">Live Radar Active</div>
+                  <div className="w-full mb-4">
                     <div className="h-2 bg-white/5 rounded-full relative overflow-hidden border border-white/10">
                       <motion.div 
                         initial={{ width: 0 }}
@@ -243,16 +244,12 @@ export const LiveFlightView: React.FC<LiveFlightViewProps> = ({ isDemoMode = fal
                         className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2"
                       >
                         <div className="relative">
-                          <div className="absolute inset-0 bg-accent/30 blur-md rounded-full" />
-                          <Plane className="w-5 h-5 text-white rotate-90 fill-accent relative z-10" />
+                          <Plane className="w-4 h-4 text-white rotate-90 fill-accent relative z-10" />
                         </div>
                       </motion.div>
                     </div>
                   </div>
-                  <div className="text-center space-y-2">
-                    <div className="text-[10px] font-bold text-white/60 uppercase tracking-widest">Live Radar Active</div>
-                    <div className="text-4xl font-black mono text-accent">{tracking.progress}%</div>
-                  </div>
+                  <div className="text-4xl font-black mono text-accent">{tracking.progress}%</div>
                 </div>
 
                 <div className="text-center md:text-right p-6 bg-white/3 rounded-xl border border-white/5">
