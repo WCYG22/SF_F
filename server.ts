@@ -452,6 +452,110 @@ function generateSimulatedTrack(flightNumber: string) {
   };
 }
 
+// Generate varied simulated data - different every time!
+function generateVariedSimulatedTrack(flightNumber: string): LiveFlightData {
+  const cleanNum = (flightNumber || 'MH123').trim().toUpperCase();
+  
+  // Airline mapping
+  const airlineMap: Record<string, string> = {
+    'MH': 'Malaysia Airlines',
+    'AK': 'AirAsia',
+    'SQ': 'Singapore Airlines',
+    'OD': 'Batik Air',
+    'FY': 'Firefly',
+    'HO': 'Juneyao Airlines',
+    'TG': 'Thai Airways',
+    'VN': 'Vietnam Airlines',
+    'CX': 'Cathay Pacific',
+    'NH': 'ANA',
+    'TK': 'Turkish Airlines',
+    'EK': 'Emirates',
+    'QR': 'Qatar Airways',
+  };
+  
+  const code = cleanNum.substring(0, 2).toUpperCase();
+  const airline = airlineMap[code] || 'International Airlines';
+
+  // Route options - varies each time
+  const routes = [
+    { from: 'KUL', fromCity: 'Kuala Lumpur', to: 'SIN', toCity: 'Singapore', duration: 70 },
+    { from: 'KUL', fromCity: 'Kuala Lumpur', to: 'BKK', toCity: 'Bangkok', duration: 150 },
+    { from: 'KUL', fromCity: 'Kuala Lumpur', to: 'HAN', toCity: 'Hanoi', duration: 180 },
+    { from: 'SIN', fromCity: 'Singapore', to: 'KUL', toCity: 'Kuala Lumpur', duration: 70 },
+    { from: 'SIN', fromCity: 'Singapore', to: 'HKG', toCity: 'Hong Kong', duration: 210 },
+    { from: 'BKK', fromCity: 'Bangkok', to: 'KUL', toCity: 'Kuala Lumpur', duration: 150 },
+    { from: 'HAN', fromCity: 'Hanoi', to: 'KUL', toCity: 'Kuala Lumpur', duration: 180 },
+    { from: 'HKG', fromCity: 'Hong Kong', to: 'SIN', toCity: 'Singapore', duration: 210 },
+  ];
+  
+  const route = routes[Math.floor(Math.random() * routes.length)];
+  
+  // Status variations
+  const statuses: Array<'IN AIR' | 'SCHEDULED' | 'LANDED' | 'DELAYED'> = ['IN AIR', 'IN AIR', 'IN AIR', 'SCHEDULED', 'LANDED'];
+  const status = statuses[Math.floor(Math.random() * statuses.length)];
+  
+  // Vary altitude/speed/progress based on status
+  let altitude: number, speed: number, progress: number;
+  if (status === 'IN AIR') {
+    altitude = 15000 + Math.floor(Math.random() * 28000); // 15k-43k feet
+    speed = 400 + Math.floor(Math.random() * 500); // 400-900 kph
+    progress = 10 + Math.floor(Math.random() * 70); // 10-80%
+  } else if (status === 'SCHEDULED') {
+    altitude = 0;
+    speed = 0;
+    progress = 0;
+  } else if (status === 'DELAYED') {
+    altitude = 0;
+    speed = 0;
+    progress = 0;
+  } else { // LANDED
+    altitude = 0;
+    speed = 0;
+    progress = 100;
+  }
+
+  const now = new Date();
+  const departTime = new Date(now.getTime() - Math.random() * 180 * 60000); // Random past time
+  const arrivalTime = new Date(departTime.getTime() + route.duration * 60000);
+
+  const aircraftModels = [
+    'Boeing 737-800', 'Airbus A320', 'Boeing 777-300', 'Airbus A350', 
+    'Embraer E190', 'Boeing 787-9', 'Airbus A380', 'ATR 72-600'
+  ];
+  
+  const terminals = ['M', '1', '2', '3', 'A', 'B', 'C', '4'];
+  const gates = ['C12', 'B5', 'A22', 'F40', 'D8', 'E15', 'G3', 'H18'];
+
+  return {
+    flightNumber: cleanNum,
+    airline: airline,
+    origin: {
+      airport: route.from,
+      city: route.fromCity,
+      time: departTime.toISOString(),
+      terminal: terminals[Math.floor(Math.random() * terminals.length)],
+      gate: gates[Math.floor(Math.random() * gates.length)]
+    },
+    destination: {
+      airport: route.to,
+      city: route.toCity,
+      time: arrivalTime.toISOString(),
+      terminal: terminals[Math.floor(Math.random() * terminals.length)],
+      gate: gates[Math.floor(Math.random() * gates.length)]
+    },
+    status: status,
+    progress: progress,
+    altitude: altitude,
+    speed: speed,
+    aircraft: {
+      model: aircraftModels[Math.floor(Math.random() * aircraftModels.length)],
+      age: (1 + Math.floor(Math.random() * 15)) + ' years',
+      registration: cleanNum
+    },
+    estimatedArrival: arrivalTime.toISOString()
+  };
+}
+
 // API Routes FIRST
 app.post("/api/search", async (req, res) => {
   const { query, departureDate } = req.body;
@@ -607,98 +711,14 @@ app.post("/api/track", async (req, res) => {
   }
 
   console.log(`[TRACK] Tracking flight: ${flightNumber}`);
-  console.log(`[TRACK] GEMINI_API_KEY configured: ${!!process.env.GEMINI_API_KEY}`);
-
-  if (!process.env.GEMINI_API_KEY) {
-    console.warn("[TRACK] GEMINI_API_KEY not configured, using simulated data");
-    return res.json(generateSimulatedTrack(flightNumber));
-  }
 
   try {
-    console.log(`[TRACK] Calling Gemini API for ${flightNumber}...`);
-    
-    // Use Gemini to generate realistic flight tracking data
-    const response = await withTimeout(
-      retryWithBackoff(() => ai.models.generateContent({
-        model: "gemini-3.1-flash-lite",
-        contents: `Generate realistic flight tracking data for flight number: ${flightNumber}
-
-Create varied, realistic aircraft telemetry:
-- Flight number: ${flightNumber}
-- Airline: Auto-identify from flight code
-- Status: IN AIR, SCHEDULED, LANDED, or DELAYED
-- Altitude: 25000-35000 feet if IN AIR, else 0
-- Speed: 500-800 kph if IN AIR, else 0  
-- Progress: Random 15-85% if IN AIR
-- Airports: Mix of different realistic Asia-Pacific routes
-- Different times and routes each time
-
-Return ONLY valid JSON.`,
-        config: {
-          responseMimeType: "application/json",
-          responseSchema: {
-            type: Type.OBJECT,
-            properties: {
-              flightNumber: { type: Type.STRING },
-              airline: { type: Type.STRING },
-              origin: {
-                type: Type.OBJECT,
-                properties: {
-                  airport: { type: Type.STRING },
-                  city: { type: Type.STRING },
-                  time: { type: Type.STRING },
-                  terminal: { type: Type.STRING },
-                  gate: { type: Type.STRING }
-                }
-              },
-              destination: {
-                type: Type.OBJECT,
-                properties: {
-                  airport: { type: Type.STRING },
-                  city: { type: Type.STRING },
-                  time: { type: Type.STRING },
-                  terminal: { type: Type.STRING },
-                  gate: { type: Type.STRING }
-                }
-              },
-              status: { type: Type.STRING, enum: ['IN AIR', 'SCHEDULED', 'LANDED', 'DELAYED'] },
-              progress: { type: Type.NUMBER },
-              altitude: { type: Type.NUMBER },
-              speed: { type: Type.NUMBER },
-              aircraft: {
-                type: Type.OBJECT,
-                properties: {
-                  model: { type: Type.STRING },
-                  age: { type: Type.STRING },
-                  registration: { type: Type.STRING }
-                }
-              },
-              estimatedArrival: { type: Type.STRING }
-            }
-          }
-        }
-      })),
-      8000,
-      "Gemini flight tracking request timed out"
-    );
-
-    const text = response.text || "null";
-    console.log(`[TRACK] Gemini response received, length: ${text.length}`);
-    
-    const data = JSON.parse(text);
-    console.log(`[TRACK] Parsed data:`, data);
-
-    if (data && data.flightNumber) {
-      console.log(`[TRACK] ✓ Returning Gemini-generated data for ${flightNumber}`);
-      return res.json(data);
-    }
-
-    console.log(`[TRACK] Gemini returned invalid data, using simulated`);
-    res.json(generateSimulatedTrack(flightNumber));
+    // Generate varied simulated flight data - changes every time!
+    const flightData = generateVariedSimulatedTrack(flightNumber);
+    console.log(`[TRACK] ✓ Returning varied simulated data for ${flightNumber}`);
+    res.json(flightData);
   } catch (err: any) {
-    console.error(`[TRACK] ✗ Gemini error: ${err.message}`);
-    console.error(`[TRACK] Error details:`, err);
-    console.log("[TRACK] Falling back to simulated data");
+    console.error(`[TRACK] ✗ Error: ${err.message}`);
     res.json(generateSimulatedTrack(flightNumber));
   }
 });
