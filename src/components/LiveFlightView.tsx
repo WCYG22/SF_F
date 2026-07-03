@@ -10,6 +10,8 @@ import {
   Wind, 
   ShieldCheck, 
   Map as MapIcon,
+  CheckCircle2,
+  Circle,
 } from 'lucide-react';
 import { Card, Badge } from './UI';
 import { trackFlight, LiveFlightData } from '../services/flightService';
@@ -40,6 +42,43 @@ const formatDate = (timeStr: string) => {
     return '';
   }
 };
+
+// Airport timezone mapping
+const AIRPORT_TIMEZONES: { [key: string]: { name: string; timezone: string; offset: string } } = {
+  'KUL': { name: 'Kuala Lumpur International', timezone: 'MYT', offset: '+08:00' },
+  'SIN': { name: 'Singapore Changi', timezone: 'SGT', offset: '+08:00' },
+  'MH123': { name: 'Kuala Lumpur International', timezone: 'MYT', offset: '+08:00' },
+  'BKK': { name: 'Bangkok Suvarnabhumi', timezone: 'ICT', offset: '+07:00' },
+  'HAN': { name: 'Hanoi Noi Bai', timezone: 'ICT', offset: '+07:00' },
+  'SGN': { name: 'Ho Chi Minh City Tan Son Nhat', timezone: 'ICT', offset: '+07:00' },
+  'PEK': { name: 'Beijing Capital International', timezone: 'CST', offset: '+08:00' },
+  'HKG': { name: 'Hong Kong International', timezone: 'HKT', offset: '+08:00' },
+  'NRT': { name: 'Tokyo Narita', timezone: 'JST', offset: '+09:00' },
+  'ICN': { name: 'Seoul Incheon', timezone: 'KST', offset: '+09:00' },
+  'LAX': { name: 'Los Angeles International', timezone: 'PST', offset: '-08:00' },
+  'LHR': { name: 'London Heathrow', timezone: 'GMT', offset: '+00:00' },
+  'JFK': { name: 'New York JFK', timezone: 'EST', offset: '-05:00' },
+  'DXB': { name: 'Dubai International', timezone: 'GST', offset: '+04:00' },
+  'AK512': { name: 'Kuala Lumpur International', timezone: 'MYT', offset: '+08:00' },
+  'SQ801': { name: 'Singapore Changi', timezone: 'SGT', offset: '+08:00' },
+};
+
+// Flight status stages
+const getFlightStatus = (progress: number): { stage: string; completed: number } => {
+  if (progress < 5) return { stage: 'Boarding', completed: 0 };
+  if (progress < 15) return { stage: 'Taxiing', completed: 1 };
+  if (progress < 85) return { stage: 'Cruising', completed: 2 };
+  if (progress < 95) return { stage: 'Descending', completed: 3 };
+  return { stage: 'Landing', completed: 4 };
+};
+
+const statusStages = [
+  { name: 'Scheduled', icon: Circle },
+  { name: 'Boarding', icon: Circle },
+  { name: 'Airborne', icon: Plane },
+  { name: 'Approaching', icon: Navigation },
+  { name: 'Landed', icon: CheckCircle2 }
+];
 
 interface LiveFlightViewProps {
   isDemoMode?: boolean;
@@ -190,6 +229,98 @@ export const LiveFlightView: React.FC<LiveFlightViewProps> = ({ isDemoMode = fal
               )}
               {tracking.status}
             </Badge>
+          </div>
+
+          {/* Flight Status Timeline */}
+          <div className="bg-white/5 rounded-2xl p-6 border border-white/10">
+            <div className="mb-4">
+              <p className="text-[10px] text-white/50 font-bold uppercase tracking-tighter mb-3">Flight Progress</p>
+              <div className="flex items-center justify-between gap-2">
+                {statusStages.map((stage, idx) => {
+                  const { completed } = getFlightStatus(tracking.progress);
+                  const isActive = idx === completed;
+                  const isCompleted = idx < completed;
+                  const StageIcon = stage.icon;
+                  
+                  return (
+                    <div key={idx} className="flex items-center gap-2 flex-1">
+                      <motion.div
+                        animate={{
+                          scale: isActive ? 1.2 : 1,
+                          opacity: isCompleted || isActive ? 1 : 0.4
+                        }}
+                        className={`flex items-center justify-center w-8 h-8 rounded-full ${
+                          isCompleted ? 'bg-accent text-white' :
+                          isActive ? 'bg-accent/30 border-2 border-accent text-accent' :
+                          'bg-white/10 text-white/40'
+                        }`}
+                      >
+                        <StageIcon className="w-4 h-4" />
+                      </motion.div>
+                      <div className="hidden sm:block text-[9px] font-bold text-white/60 whitespace-nowrap">
+                        {stage.name}
+                      </div>
+                      
+                      {idx < statusStages.length - 1 && (
+                        <div className={`flex-1 h-0.5 mx-1 ${
+                          idx < completed ? 'bg-accent' : 'bg-white/10'
+                        }`} />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+            
+            <div className="text-center">
+              <div className="text-sm font-black text-accent">{getFlightStatus(tracking.progress).stage}</div>
+              <div className="text-[9px] text-white/40 mt-1">{tracking.progress}% of route completed</div>
+            </div>
+          </div>
+
+          {/* Airport Details with Timezone */}
+          <div className="grid grid-cols-2 gap-4">
+            {/* Departure */}
+            <div className="bg-gradient-to-br from-accent/10 to-background border border-accent/30 rounded-2xl p-4">
+              <div className="text-[9px] font-bold uppercase tracking-tighter text-accent mb-2">Departure</div>
+              <div className="mb-3">
+                <div className="text-lg font-black mono text-white">{tracking.origin.airport}</div>
+                <div className="text-[10px] text-white/60 font-bold mt-1">
+                  {AIRPORT_TIMEZONES[tracking.origin.airport]?.name || 'Airport'}
+                </div>
+              </div>
+              <div className="space-y-1 text-[9px]">
+                <div className="flex justify-between">
+                  <span className="text-white/50">Scheduled:</span>
+                  <span className="text-white font-bold">{formatTime(tracking.origin.time)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-white/50">Timezone:</span>
+                  <span className="text-accent font-bold">{AIRPORT_TIMEZONES[tracking.origin.airport]?.timezone || 'UTC'}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Arrival */}
+            <div className="bg-gradient-to-br from-blue-500/10 to-background border border-blue-500/30 rounded-2xl p-4">
+              <div className="text-[9px] font-bold uppercase tracking-tighter text-blue-400 mb-2">Arrival</div>
+              <div className="mb-3">
+                <div className="text-lg font-black mono text-white">{tracking.destination.airport}</div>
+                <div className="text-[10px] text-white/60 font-bold mt-1">
+                  {AIRPORT_TIMEZONES[tracking.destination.airport]?.name || 'Airport'}
+                </div>
+              </div>
+              <div className="space-y-1 text-[9px]">
+                <div className="flex justify-between">
+                  <span className="text-white/50">Estimated:</span>
+                  <span className="text-white font-bold">{formatTime(tracking.estimatedArrival)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-white/50">Timezone:</span>
+                  <span className="text-blue-400 font-bold">{AIRPORT_TIMEZONES[tracking.destination.airport]?.timezone || 'UTC'}</span>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Radar Visualization - Centered - show only departure and arrival airports */}
