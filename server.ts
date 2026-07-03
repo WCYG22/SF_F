@@ -606,31 +606,34 @@ app.post("/api/track", async (req, res) => {
     return res.status(400).json({ error: "Flight number is required" });
   }
 
-  console.log(`Tracking flight: ${flightNumber}`);
+  console.log(`[TRACK] Tracking flight: ${flightNumber}`);
+  console.log(`[TRACK] GEMINI_API_KEY configured: ${!!process.env.GEMINI_API_KEY}`);
 
   if (!process.env.GEMINI_API_KEY) {
-    console.warn("GEMINI_API_KEY not configured, using simulated data");
+    console.warn("[TRACK] GEMINI_API_KEY not configured, using simulated data");
     return res.json(generateSimulatedTrack(flightNumber));
   }
 
   try {
+    console.log(`[TRACK] Calling Gemini API for ${flightNumber}...`);
+    
     // Use Gemini to generate realistic flight tracking data
     const response = await withTimeout(
       retryWithBackoff(() => ai.models.generateContent({
         model: "gemini-3.1-flash-lite",
-        contents: `You are a flight tracking system. Generate realistic flight tracking data for flight number: ${flightNumber}
+        contents: `Generate realistic flight tracking data for flight number: ${flightNumber}
 
-Create data that looks like real aircraft telemetry:
-- Flight number: Use the provided flight number or generate a realistic one
-- Airline: Identify from flight number (MH=Malaysia Airlines, SQ=Singapore Airlines, AK=AirAsia, etc)
-- Status: Can be IN AIR, SCHEDULED, LANDED, or DELAYED
-- Altitude: If IN AIR, between 20000-43000 feet. If not IN AIR, 0 feet
-- Speed: If IN AIR, between 450-900 kph. If not IN AIR, 0 kph
-- Progress: 0-100% of route completion
-- Airports: Realistic airport codes (KUL, SIN, BKK, HAN, HKG, NRT, etc)
-- Times: Current time for current status
+Create varied, realistic aircraft telemetry:
+- Flight number: ${flightNumber}
+- Airline: Auto-identify from flight code
+- Status: IN AIR, SCHEDULED, LANDED, or DELAYED
+- Altitude: 25000-35000 feet if IN AIR, else 0
+- Speed: 500-800 kph if IN AIR, else 0  
+- Progress: Random 15-85% if IN AIR
+- Airports: Mix of different realistic Asia-Pacific routes
+- Different times and routes each time
 
-Make it realistic and varied. Return ONLY valid JSON.`,
+Return ONLY valid JSON.`,
         config: {
           responseMimeType: "application/json",
           responseSchema: {
@@ -680,18 +683,22 @@ Make it realistic and varied. Return ONLY valid JSON.`,
     );
 
     const text = response.text || "null";
+    console.log(`[TRACK] Gemini response received, length: ${text.length}`);
+    
     const data = JSON.parse(text);
+    console.log(`[TRACK] Parsed data:`, data);
 
     if (data && data.flightNumber) {
-      console.log(`Generated flight data for ${flightNumber}:`, data);
+      console.log(`[TRACK] ✓ Returning Gemini-generated data for ${flightNumber}`);
       return res.json(data);
     }
 
-    console.log(`Gemini returned invalid data, using simulated`);
+    console.log(`[TRACK] Gemini returned invalid data, using simulated`);
     res.json(generateSimulatedTrack(flightNumber));
   } catch (err: any) {
-    console.error("Gemini flight tracking error:", err.message);
-    console.log("Falling back to simulated data");
+    console.error(`[TRACK] ✗ Gemini error: ${err.message}`);
+    console.error(`[TRACK] Error details:`, err);
+    console.log("[TRACK] Falling back to simulated data");
     res.json(generateSimulatedTrack(flightNumber));
   }
 });
