@@ -208,18 +208,18 @@ export const LiveFlightView: React.FC<LiveFlightViewProps> = ({ isDemoMode = fal
           {/* Flight Header */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Plane className="w-5 h-5 text-accent" />
+              <Plane className="w-6 h-6 text-accent" />
               <div>
-                <h3 className="text-xl font-black mono text-white">{tracking.flightNumber}</h3>
-                <p className="text-xs text-white/60 font-bold">{tracking.airline}</p>
-                <div className="flex gap-4 mt-1 text-[10px] text-white/50">
+                <h3 className="text-3xl font-black mono text-white">{tracking.flightNumber}</h3>
+                <p className="text-sm text-white/60 font-bold">{tracking.airline}</p>
+                <div className="flex gap-4 mt-1 text-xs text-white/50">
                   <span>{formatTime(tracking.origin.time)} → {formatTime(tracking.destination.time)}</span>
                 </div>
               </div>
             </div>
             <Badge 
               variant={tracking.status === 'IN AIR' ? 'success' : 'warning'} 
-              className="px-4 py-2 text-[10px] flex items-center gap-2"
+              className="px-4 py-2 text-xs flex items-center gap-2"
             >
               {tracking.status === 'IN AIR' && (
                 <span className="relative flex h-2 w-2">
@@ -234,7 +234,7 @@ export const LiveFlightView: React.FC<LiveFlightViewProps> = ({ isDemoMode = fal
           {/* Flight Status Timeline */}
           <div className="bg-white/5 rounded-2xl p-6 border border-white/10">
             <div className="mb-4">
-              <p className="text-[10px] text-white/50 font-bold uppercase tracking-tighter mb-3">Flight Progress</p>
+              <p className="text-xs text-white/50 font-bold uppercase tracking-tighter mb-3">Flight Progress</p>
               <div className="flex items-center justify-between gap-2">
                 {statusStages.map((stage, idx) => {
                   const { completed } = getFlightStatus(tracking.progress);
@@ -249,15 +249,15 @@ export const LiveFlightView: React.FC<LiveFlightViewProps> = ({ isDemoMode = fal
                           scale: isActive ? 1.2 : 1,
                           opacity: isCompleted || isActive ? 1 : 0.4
                         }}
-                        className={`flex items-center justify-center w-8 h-8 rounded-full ${
+                        className={`flex items-center justify-center w-10 h-10 rounded-full ${
                           isCompleted ? 'bg-accent text-white' :
                           isActive ? 'bg-accent/30 border-2 border-accent text-accent' :
                           'bg-white/10 text-white/40'
                         }`}
                       >
-                        <StageIcon className="w-4 h-4" />
+                        <StageIcon className="w-5 h-5" />
                       </motion.div>
-                      <div className="hidden sm:block text-[9px] font-bold text-white/60 whitespace-nowrap">
+                      <div className="hidden sm:block text-xs font-bold text-white/60 whitespace-nowrap">
                         {stage.name}
                       </div>
                       
@@ -273,8 +273,8 @@ export const LiveFlightView: React.FC<LiveFlightViewProps> = ({ isDemoMode = fal
             </div>
             
             <div className="text-center">
-              <div className="text-sm font-black text-accent">{getFlightStatus(tracking.progress).stage}</div>
-              <div className="text-[9px] text-white/40 mt-1">{tracking.progress}% of route completed</div>
+              <div className="text-lg font-black text-accent">{getFlightStatus(tracking.progress).stage}</div>
+              <div className="text-xs text-white/40 mt-1">{tracking.progress}% of route completed</div>
             </div>
           </div>
 
@@ -282,14 +282,14 @@ export const LiveFlightView: React.FC<LiveFlightViewProps> = ({ isDemoMode = fal
           <div className="grid grid-cols-2 gap-4">
             {/* Departure */}
             <div className="bg-gradient-to-br from-accent/10 to-background border border-accent/30 rounded-2xl p-4">
-              <div className="text-[9px] font-bold uppercase tracking-tighter text-accent mb-2">Departure</div>
+              <div className="text-xs font-bold uppercase tracking-tighter text-accent mb-2">Departure</div>
               <div className="mb-3">
-                <div className="text-lg font-black mono text-white">{tracking.origin.airport}</div>
-                <div className="text-[10px] text-white/60 font-bold mt-1">
+                <div className="text-2xl font-black mono text-white">{tracking.origin.airport}</div>
+                <div className="text-xs text-white/60 font-bold mt-1">
                   {AIRPORT_TIMEZONES[tracking.origin.airport]?.name || 'Airport'}
                 </div>
               </div>
-              <div className="space-y-1 text-[9px]">
+              <div className="space-y-2 text-xs">
                 <div className="flex justify-between">
                   <span className="text-white/50">Scheduled:</span>
                   <span className="text-white font-bold">{formatTime(tracking.origin.time)}</span>
@@ -303,14 +303,14 @@ export const LiveFlightView: React.FC<LiveFlightViewProps> = ({ isDemoMode = fal
 
             {/* Arrival */}
             <div className="bg-gradient-to-br from-blue-500/10 to-background border border-blue-500/30 rounded-2xl p-4">
-              <div className="text-[9px] font-bold uppercase tracking-tighter text-blue-400 mb-2">Arrival</div>
+              <div className="text-xs font-bold uppercase tracking-tighter text-blue-400 mb-2">Arrival</div>
               <div className="mb-3">
-                <div className="text-lg font-black mono text-white">{tracking.destination.airport}</div>
-                <div className="text-[10px] text-white/60 font-bold mt-1">
+                <div className="text-2xl font-black mono text-white">{tracking.destination.airport}</div>
+                <div className="text-xs text-white/60 font-bold mt-1">
                   {AIRPORT_TIMEZONES[tracking.destination.airport]?.name || 'Airport'}
                 </div>
               </div>
-              <div className="space-y-1 text-[9px]">
+              <div className="space-y-2 text-xs">
                 <div className="flex justify-between">
                   <span className="text-white/50">Estimated:</span>
                   <span className="text-white font-bold">{formatTime(tracking.estimatedArrival)}</span>
@@ -414,21 +414,21 @@ export const LiveFlightView: React.FC<LiveFlightViewProps> = ({ isDemoMode = fal
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-background via-background/50 to-transparent p-6 z-20 space-y-3">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-accent rounded-full" />
-                <span className="text-[10px] font-black text-accent uppercase tracking-widest">Live Radar Active</span>
+                <span className="text-xs font-black text-accent uppercase tracking-widest">Live Radar Active</span>
               </div>
               
               <div className="grid grid-cols-3 gap-4 text-center">
                 <div>
-                  <div className="text-[8px] text-white/50 font-bold uppercase tracking-tighter mb-1">Current Position</div>
-                  <div className="text-sm font-black mono text-accent">{tracking.progress}%</div>
+                  <div className="text-xs text-white/50 font-bold uppercase tracking-tighter mb-1">Current Position</div>
+                  <div className="text-xl font-black mono text-accent">{tracking.progress}%</div>
                 </div>
                 <div>
-                  <div className="text-[8px] text-white/50 font-bold uppercase tracking-tighter mb-1">Latitude</div>
-                  <div className="text-sm font-bold mono text-white/70">{(3.1390 + (Math.random() * 0.1)).toFixed(4)}</div>
+                  <div className="text-xs text-white/50 font-bold uppercase tracking-tighter mb-1">Latitude</div>
+                  <div className="text-lg font-bold mono text-white/70">{(3.1390 + (Math.random() * 0.1)).toFixed(4)}</div>
                 </div>
                 <div>
-                  <div className="text-[8px] text-white/50 font-bold uppercase tracking-tighter mb-1">Longitude</div>
-                  <div className="text-sm font-bold mono text-white/70">{(101.6869 + (Math.random() * 0.1)).toFixed(4)}</div>
+                  <div className="text-xs text-white/50 font-bold uppercase tracking-tighter mb-1">Longitude</div>
+                  <div className="text-lg font-bold mono text-white/70">{(101.6869 + (Math.random() * 0.1)).toFixed(4)}</div>
                 </div>
               </div>
             </div>
@@ -437,16 +437,16 @@ export const LiveFlightView: React.FC<LiveFlightViewProps> = ({ isDemoMode = fal
           {/* Key Metrics */}
           <div className="grid grid-cols-3 gap-4">
             <div className="text-center p-4 bg-white/5 rounded-lg border border-white/10">
-              <div className="text-[10px] text-white/50 font-bold uppercase tracking-tighter mb-1">Altitude</div>
-              <div className="text-lg font-black mono text-accent">{tracking.altitude.toLocaleString()} ft</div>
+              <div className="text-xs text-white/50 font-bold uppercase tracking-tighter mb-2">Altitude</div>
+              <div className="text-2xl font-black mono text-accent">{tracking.altitude.toLocaleString()} ft</div>
             </div>
             <div className="text-center p-4 bg-white/5 rounded-lg border border-white/10">
-              <div className="text-[10px] text-white/50 font-bold uppercase tracking-tighter mb-1">Ground Speed</div>
-              <div className="text-lg font-black mono text-accent">{tracking.speed} kph</div>
+              <div className="text-xs text-white/50 font-bold uppercase tracking-tighter mb-2">Ground Speed</div>
+              <div className="text-2xl font-black mono text-accent">{tracking.speed} kph</div>
             </div>
             <div className="text-center p-4 bg-white/5 rounded-lg border border-white/10">
-              <div className="text-[10px] text-white/50 font-bold uppercase tracking-tighter mb-1">ETA</div>
-              <div className="text-lg font-black mono text-accent">{formatTime(tracking.estimatedArrival)}</div>
+              <div className="text-xs text-white/50 font-bold uppercase tracking-tighter mb-2">ETA</div>
+              <div className="text-2xl font-black mono text-accent">{formatTime(tracking.estimatedArrival)}</div>
             </div>
           </div>
         </motion.div>
