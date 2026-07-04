@@ -20,6 +20,9 @@ const ai = new GoogleGenAI({
   }
 });
 
+// Cache for flight data
+const flightDataCache: Record<string, { data: any; timestamp: number }> = {};
+
 // Type definitions
 interface LiveFlightData {
   flightNumber: string;
