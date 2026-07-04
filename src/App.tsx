@@ -25,6 +25,7 @@ import {
   Lock,
   ShieldAlert,
   ChevronDown,
+  Check,
 } from 'lucide-react';
 import { format, parseISO, addMonths, addDays } from 'date-fns';
 import { searchFlight, Itinerary, FlightLeg } from './services/flightService';
@@ -91,6 +92,8 @@ export default function App() {
   // Profile Page State
   const [showSearchHistory, setShowSearchHistory] = useState(false);
   const [showPriceAlerts, setShowPriceAlerts] = useState(false);
+  const [selectedHistoryItems, setSelectedHistoryItems] = useState<Set<number>>(new Set());
+  const [selectedAlertItems, setSelectedAlertItems] = useState<Set<number>>(new Set());
 
   // Navigation State
   const [activeTab, setActiveTab] = useState<'search' | 'live' | 'saved' | 'profile'>('search');
@@ -1981,12 +1984,24 @@ export default function App() {
                       <p className="text-xs text-white/50">Your recent flight searches</p>
                     </div>
                   </div>
-                  <button
-                    onClick={() => setShowSearchHistory(false)}
-                    className="text-white/60 hover:text-white transition-all"
-                  >
-                    <ChevronRight className="w-6 h-6 rotate-90" />
-                  </button>
+                  <div className="flex items-center gap-3">
+                    {selectedHistoryItems.size > 0 && (
+                      <button
+                        onClick={() => {
+                          setSelectedHistoryItems(new Set());
+                        }}
+                        className="px-3 py-1.5 text-xs font-bold uppercase text-red-400 hover:bg-red-500/10 border border-red-500/30 rounded-lg transition-all"
+                      >
+                        Clear Selected ({selectedHistoryItems.size})
+                      </button>
+                    )}
+                    <button
+                      onClick={() => setShowSearchHistory(false)}
+                      className="text-white/60 hover:text-white transition-all"
+                    >
+                      <ChevronRight className="w-6 h-6 rotate-90" />
+                    </button>
+                  </div>
                 </div>
 
                 {/* Content */}
@@ -1998,9 +2013,34 @@ export default function App() {
                     { from: 'KUL', to: 'HAN', date: 'Dec 5, 2024', price: 'RM 320', status: 'Viewed' },
                     { from: 'BKK', to: 'KUL', date: 'Dec 1, 2024', price: 'RM 450', status: 'Viewed' },
                   ].map((item, idx) => (
-                    <div key={idx} className="p-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all cursor-pointer group">
+                    <div 
+                      key={idx} 
+                      onClick={() => {
+                        const newSelected = new Set(selectedHistoryItems);
+                        if (newSelected.has(idx)) {
+                          newSelected.delete(idx);
+                        } else {
+                          newSelected.add(idx);
+                        }
+                        setSelectedHistoryItems(newSelected);
+                      }}
+                      className={`p-4 border rounded-xl transition-all cursor-pointer group ${
+                        selectedHistoryItems.has(idx)
+                          ? 'bg-accent/20 border-accent/50'
+                          : 'bg-white/5 hover:bg-white/10 border-white/10'
+                      }`}
+                    >
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4 flex-1">
+                        <div className="flex items-center gap-3 flex-1">
+                          <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
+                            selectedHistoryItems.has(idx)
+                              ? 'bg-accent border-accent'
+                              : 'border-white/30 hover:border-accent'
+                          }`}>
+                            {selectedHistoryItems.has(idx) && (
+                              <Check className="w-3 h-3 text-background" />
+                            )}
+                          </div>
                           <div className="text-center">
                             <div className="text-sm font-black mono text-white">{item.from}</div>
                             <div className="text-[10px] text-white/50">Departure</div>
@@ -2057,12 +2097,24 @@ export default function App() {
                       <p className="text-xs text-white/50">Manage your price drop notifications</p>
                     </div>
                   </div>
-                  <button
-                    onClick={() => setShowPriceAlerts(false)}
-                    className="text-white/60 hover:text-white transition-all"
-                  >
-                    <ChevronRight className="w-6 h-6 rotate-90" />
-                  </button>
+                  <div className="flex items-center gap-3">
+                    {selectedAlertItems.size > 0 && (
+                      <button
+                        onClick={() => {
+                          setSelectedAlertItems(new Set());
+                        }}
+                        className="px-3 py-1.5 text-xs font-bold uppercase text-red-400 hover:bg-red-500/10 border border-red-500/30 rounded-lg transition-all"
+                      >
+                        Clear Selected ({selectedAlertItems.size})
+                      </button>
+                    )}
+                    <button
+                      onClick={() => setShowPriceAlerts(false)}
+                      className="text-white/60 hover:text-white transition-all"
+                    >
+                      <ChevronRight className="w-6 h-6 rotate-90" />
+                    </button>
+                  </div>
                 </div>
 
                 {/* Content */}
@@ -2073,9 +2125,34 @@ export default function App() {
                     { from: 'SIN', to: 'HKG', currentPrice: 'RM 780', targetPrice: 'RM 700', savings: 'RM 80', status: 'Alert Triggered' },
                     { from: 'HAN', to: 'KUL', currentPrice: 'RM 380', targetPrice: 'RM 320', savings: 'RM 60', status: 'Active' },
                   ].map((item, idx) => (
-                    <div key={idx} className="p-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all cursor-pointer group">
+                    <div 
+                      key={idx} 
+                      onClick={() => {
+                        const newSelected = new Set(selectedAlertItems);
+                        if (newSelected.has(idx)) {
+                          newSelected.delete(idx);
+                        } else {
+                          newSelected.add(idx);
+                        }
+                        setSelectedAlertItems(newSelected);
+                      }}
+                      className={`p-4 border rounded-xl transition-all cursor-pointer group ${
+                        selectedAlertItems.has(idx)
+                          ? 'bg-blue-500/20 border-blue-500/50'
+                          : 'bg-white/5 hover:bg-white/10 border-white/10'
+                      }`}
+                    >
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4 flex-1">
+                        <div className="flex items-center gap-3 flex-1">
+                          <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
+                            selectedAlertItems.has(idx)
+                              ? 'bg-blue-500 border-blue-500'
+                              : 'border-white/30 hover:border-blue-500'
+                          }`}>
+                            {selectedAlertItems.has(idx) && (
+                              <Check className="w-3 h-3 text-background" />
+                            )}
+                          </div>
                           <div className="text-center">
                             <div className="text-sm font-black mono text-white">{item.from}</div>
                             <div className="text-[10px] text-white/50">From</div>
