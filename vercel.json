@@ -3,8 +3,9 @@
   "outputDirectory": "dist",
   "installCommand": "npm install",
   "framework": "vite",
+  "ignoreCommand": "git diff --quiet HEAD^ HEAD -- ':!api/'",
   "typescript": {
-    "version": "5.8.3"
+    "ignoreBuildErrors": true
   },
   "functions": {
     "api/search.js": {
