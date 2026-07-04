@@ -88,6 +88,10 @@ export default function App() {
   const [filterStops, setFilterStops] = useState<number | null>(null);
   const [filterTimeOfDay, setFilterTimeOfDay] = useState<'morning' | 'afternoon' | 'evening' | null>(null);
 
+  // Profile Page State
+  const [showSearchHistory, setShowSearchHistory] = useState(false);
+  const [showPriceAlerts, setShowPriceAlerts] = useState(false);
+
   // Navigation State
   const [activeTab, setActiveTab] = useState<'search' | 'live' | 'saved' | 'profile'>('search');
 
@@ -1938,7 +1942,7 @@ export default function App() {
                     </div>
 
                     <div className="pt-4 border-t border-accent/20">
-                      <button className="w-full py-3 px-4 bg-accent/20 hover:bg-accent/30 text-accent hover:text-accent font-bold uppercase tracking-widest rounded-lg text-xs transition-all flex items-center justify-center gap-2">
+                      <button onClick={() => setShowSearchHistory(true)} className="w-full py-3 px-4 bg-accent/20 hover:bg-accent/30 text-accent hover:text-accent font-bold uppercase tracking-widest rounded-lg text-xs transition-all flex items-center justify-center gap-2">
                         <span>View Full History</span>
                         <ChevronRight className="w-4 h-4" />
                       </button>
@@ -1977,7 +1981,7 @@ export default function App() {
                     </div>
 
                     <div className="pt-4 border-t border-blue-500/20">
-                      <button className="w-full py-3 px-4 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 hover:text-blue-300 font-bold uppercase tracking-widest rounded-lg text-xs transition-all flex items-center justify-center gap-2">
+                      <button onClick={() => setShowPriceAlerts(true)} className="w-full py-3 px-4 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 hover:text-blue-300 font-bold uppercase tracking-widest rounded-lg text-xs transition-all flex items-center justify-center gap-2">
                         <span>Manage Alerts</span>
                         <ChevronRight className="w-4 h-4" />
                       </button>
@@ -1989,6 +1993,169 @@ export default function App() {
           )}
         </AnimatePresence>
       </main>
+
+      {/* Search History Modal */}
+      <AnimatePresence>
+        {showSearchHistory && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowSearchHistory(false)}
+              className="fixed inset-0 z-[99] bg-black/40 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+            >
+              <div className="bg-background border border-white/10 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+                {/* Header */}
+                <div className="sticky top-0 bg-background border-b border-white/10 p-6 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-accent/20 rounded-lg flex items-center justify-center">
+                      <Activity className="w-5 h-5 text-accent" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-black uppercase tracking-widest">Search History</h3>
+                      <p className="text-xs text-white/50">Your recent flight searches</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowSearchHistory(false)}
+                    className="text-white/60 hover:text-white transition-all"
+                  >
+                    <ChevronRight className="w-6 h-6 rotate-90" />
+                  </button>
+                </div>
+
+                {/* Content */}
+                <div className="p-6 space-y-4">
+                  {[
+                    { from: 'KUL', to: 'SIN', date: 'Dec 15, 2024', price: 'RM 185', status: 'Booked' },
+                    { from: 'KUL', to: 'BKK', date: 'Dec 10, 2024', price: 'RM 420', status: 'Viewed' },
+                    { from: 'SIN', to: 'HKG', date: 'Dec 8, 2024', price: 'RM 680', status: 'Saved' },
+                    { from: 'KUL', to: 'HAN', date: 'Dec 5, 2024', price: 'RM 320', status: 'Viewed' },
+                    { from: 'BKK', to: 'KUL', date: 'Dec 1, 2024', price: 'RM 450', status: 'Viewed' },
+                  ].map((item, idx) => (
+                    <div key={idx} className="p-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all cursor-pointer group">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4 flex-1">
+                          <div className="text-center">
+                            <div className="text-sm font-black mono text-white">{item.from}</div>
+                            <div className="text-[10px] text-white/50">Departure</div>
+                          </div>
+                          <ArrowRight className="w-4 h-4 text-white/40" />
+                          <div className="text-center">
+                            <div className="text-sm font-black mono text-white">{item.to}</div>
+                            <div className="text-[10px] text-white/50">Arrival</div>
+                          </div>
+                          <div className="ml-4 border-l border-white/20 pl-4">
+                            <div className="text-xs text-white/70 font-bold">{item.date}</div>
+                            <div className="text-sm font-black mono text-accent mt-1">{item.price}</div>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <Badge variant="success" className="text-[10px]">{item.status}</Badge>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Price Alerts Modal */}
+      <AnimatePresence>
+        {showPriceAlerts && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowPriceAlerts(false)}
+              className="fixed inset-0 z-[99] bg-black/40 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+            >
+              <div className="bg-background border border-white/10 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+                {/* Header */}
+                <div className="sticky top-0 bg-background border-b border-white/10 p-6 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                      <TrendingDown className="w-5 h-5 text-blue-400" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-black uppercase tracking-widest">Price Alerts</h3>
+                      <p className="text-xs text-white/50">Manage your price drop notifications</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowPriceAlerts(false)}
+                    className="text-white/60 hover:text-white transition-all"
+                  >
+                    <ChevronRight className="w-6 h-6 rotate-90" />
+                  </button>
+                </div>
+
+                {/* Content */}
+                <div className="p-6 space-y-4">
+                  {[
+                    { from: 'KUL', to: 'SIN', currentPrice: 'RM 285', targetPrice: 'RM 250', savings: 'RM 35', status: 'Active' },
+                    { from: 'KUL', to: 'BKK', currentPrice: 'RM 520', targetPrice: 'RM 450', savings: 'RM 70', status: 'Active' },
+                    { from: 'SIN', to: 'HKG', currentPrice: 'RM 780', targetPrice: 'RM 700', savings: 'RM 80', status: 'Alert Triggered' },
+                    { from: 'HAN', to: 'KUL', currentPrice: 'RM 380', targetPrice: 'RM 320', savings: 'RM 60', status: 'Active' },
+                  ].map((item, idx) => (
+                    <div key={idx} className="p-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all cursor-pointer group">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4 flex-1">
+                          <div className="text-center">
+                            <div className="text-sm font-black mono text-white">{item.from}</div>
+                            <div className="text-[10px] text-white/50">From</div>
+                          </div>
+                          <ArrowRight className="w-4 h-4 text-white/40" />
+                          <div className="text-center">
+                            <div className="text-sm font-black mono text-white">{item.to}</div>
+                            <div className="text-[10px] text-white/50">To</div>
+                          </div>
+                          <div className="ml-4 border-l border-white/20 pl-4 space-y-1">
+                            <div className="flex items-center gap-2">
+                              <span className="text-[10px] text-white/50">Current:</span>
+                              <span className="text-sm font-black mono text-white">{item.currentPrice}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-[10px] text-white/50">Target:</span>
+                              <span className="text-sm font-black mono text-blue-400">{item.targetPrice}</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-right space-y-2">
+                          <div className="text-right">
+                            <div className="text-[10px] text-green-400 font-bold mb-1">Potential Savings</div>
+                            <div className="text-lg font-black mono text-green-400">{item.savings}</div>
+                          </div>
+                          <Badge variant={item.status === 'Alert Triggered' ? 'error' : 'success'} className="text-[10px]">
+                            {item.status}
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
