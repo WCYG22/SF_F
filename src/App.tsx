@@ -1907,19 +1907,56 @@ export default function App() {
               </Card>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Card className="bg-white/5 border-white/10">
-                  <div className="flex items-center gap-3 mb-4">
-                    <Activity className="w-4 h-4 text-accent" />
-                    <span className="text-xs font-bold uppercase tracking-widest">Search History</span>
+                {/* Search History Card */}
+                <Card className="border-white/10 bg-gradient-to-br from-accent/10 via-background to-background hover:border-accent/40 transition-all">
+                  <div className="space-y-4">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-accent/20 rounded-lg flex items-center justify-center border border-accent/30">
+                          <Activity className="w-5 h-5 text-accent" />
+                        </div>
+                        <div>
+                          <h4 className="text-sm font-bold uppercase tracking-widest">Search History</h4>
+                          <p className="text-[10px] text-white/50 font-bold">Recent searches</p>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-[11px] text-white/70 leading-relaxed">
+                      Track your recent flight searches and view saved itineraries. Keep your travel history organized in one place.
+                    </p>
+                    <div className="pt-2 border-t border-accent/20">
+                      <button className="text-[10px] font-bold text-accent hover:text-accent/80 uppercase tracking-widest flex items-center gap-1.5 transition-all">
+                        <span>View History</span>
+                        <ChevronRight className="w-3 h-3" />
+                      </button>
+                    </div>
                   </div>
-                  <p className="text-[10px] text-muted">View your recent flight searches and itineraries.</p>
                 </Card>
-                <Card className="bg-white/5 border-white/10">
-                  <div className="flex items-center gap-3 mb-4">
-                    <TrendingDown className="w-4 h-4 text-accent" />
-                    <span className="text-xs font-bold uppercase tracking-widest">Price Alerts</span>
+
+                {/* Price Alerts Card */}
+                <Card className="border-white/10 bg-gradient-to-br from-blue-500/10 via-background to-background hover:border-blue-500/40 transition-all">
+                  <div className="space-y-4">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center border border-blue-500/30">
+                          <TrendingDown className="w-5 h-5 text-blue-400" />
+                        </div>
+                        <div>
+                          <h4 className="text-sm font-bold uppercase tracking-widest">Price Alerts</h4>
+                          <p className="text-[10px] text-white/50 font-bold">Smart notifications</p>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-[11px] text-white/70 leading-relaxed">
+                      Get real-time price drop alerts for your favorite routes. We'll notify you when fares decrease.
+                    </p>
+                    <div className="pt-2 border-t border-blue-500/20">
+                      <button className="text-[10px] font-bold text-blue-400 hover:text-blue-300 uppercase tracking-widest flex items-center gap-1.5 transition-all">
+                        <span>Manage Alerts</span>
+                        <ChevronRight className="w-3 h-3" />
+                      </button>
+                    </div>
                   </div>
-                  <p className="text-[10px] text-muted">Get notified when prices drop for your saved routes.</p>
                 </Card>
               </div>
             </motion.div>
