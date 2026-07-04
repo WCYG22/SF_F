@@ -1646,49 +1646,6 @@ export default function App() {
                         <div className="text-[10px] font-black text-muted uppercase tracking-widest mb-1">Total Saved</div>
                         <div className="text-2xl font-black mono">{savedItineraries.length}</div>
                       </div>
-                      <div className="p-4 bg-white/5 rounded-2xl">
-                        <div className="text-[10px] font-black text-muted uppercase tracking-widest mb-1">Account Type</div>
-                        <div className="text-2xl font-black mono text-accent">FREE</div>
-                      </div>
-                    </div>
-
-                    <div className="space-y-4 pt-4 border-t border-white/5">
-                      <div className="flex flex-col gap-2">
-                        <h4 className="text-xs font-bold uppercase tracking-widest text-white/60">Quota Management</h4>
-                        <p className="text-[10px] text-muted leading-relaxed">
-                          If you are experiencing "Quota Exceeded" errors, you can use your own Gemini API key from a paid Google Cloud project.
-                        </p>
-                      </div>
-                      
-                      <div className="flex items-center justify-between p-4 bg-accent/5 border border-accent/20 rounded-2xl">
-                        <div className="flex items-center gap-3">
-                          <div className={cn("w-2 h-2 rounded-full", hasApiKey ? "bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]" : "bg-yellow-500 shadow-[0_0_8px_rgba(234,179,8,0.5)]")} />
-                          <div>
-                            <div className="text-[10px] font-black uppercase tracking-widest">
-                              {hasApiKey ? "Personal API Key Active" : "Using Shared Platform Quota"}
-                            </div>
-                            <div className="text-[8px] text-muted font-bold uppercase">
-                              {hasApiKey ? "Dedicated limits enabled" : "Limited requests per minute"}
-                            </div>
-                          </div>
-                        </div>
-                        <button 
-                          onClick={handleSelectApiKey}
-                          className="px-4 py-2 bg-accent text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-accent/80 transition-all"
-                        >
-                          {hasApiKey ? "Change Key" : "Select Key"}
-                        </button>
-                      </div>
-                      
-                      <a 
-                        href="https://ai.google.dev/gemini-api/docs/billing" 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 text-[8px] font-bold text-accent hover:underline uppercase tracking-widest"
-                      >
-                         <Info className="w-3 h-3" />
-                        Learn how to set up a paid API key
-                      </a>
                     </div>
 
                     <button 
