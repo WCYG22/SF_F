@@ -1414,11 +1414,11 @@ export default function App() {
             >
               <div className="flex flex-col gap-2 px-2">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-xl font-bold tracking-tight flex items-center gap-3">
-                    <Heart className="w-6 h-6 text-red-500 fill-current" />
+                  <h2 className="text-3xl font-black tracking-tight flex items-center gap-4">
+                    <Heart className="w-8 h-8 text-red-500 fill-current" />
                     Saved Trips
                   </h2>
-                  <span className="text-[10px] mono text-white/60">{savedItineraries.length} SAVED</span>
+                  <span className="text-sm mono text-white/60 font-bold">{savedItineraries.length} SAVED</span>
                 </div>
                 <p className="text-xs text-white/70">Manage and track your favorite flight itineraries and price alerts.</p>
               </div>
@@ -1432,13 +1432,13 @@ export default function App() {
                       placeholder="Search saved trips..."
                       value={savedSearchQuery}
                       onChange={(e) => setSavedSearchQuery(e.target.value)}
-                      className="w-full bg-white/5 border border-white/10 rounded-xl pl-9 pr-4 py-2 text-xs focus:border-accent outline-none transition-all"
+                      className="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-4 py-3 text-sm focus:border-accent outline-none transition-all"
                     />
                   </div>
                   <select 
                     value={savedFilterAirline}
                     onChange={(e) => setSavedFilterAirline(e.target.value)}
-                    className="bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-xs focus:border-accent outline-none transition-all"
+                    className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-accent outline-none transition-all"
                     style={{
                       colorScheme: 'dark',
                       backgroundColor: '#0f172a',
@@ -2246,22 +2246,22 @@ const ItineraryCard: React.FC<{
       onClick={onClick}
       className="cursor-pointer"
     >
-      <Card className="hover:bg-white/[0.07] hover:border-accent/40 transition-all group border border-white/10 relative overflow-hidden">
+      <Card className="hover:bg-white/[0.07] hover:border-accent/40 transition-all group border border-white/10 relative overflow-hidden p-6">
         {/* Real-time Status Simulation */}
-        <div className="absolute top-0 right-0 px-3 py-1 bg-accent/10 border-b border-l border-accent/20 rounded-bl-lg flex items-center gap-1.5">
-          <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
-          <span className="text-[8px] font-black text-accent uppercase tracking-widest">Live: On Time</span>
+        <div className="absolute top-0 right-0 px-4 py-2 bg-accent/10 border-b border-l border-accent/20 rounded-bl-lg flex items-center gap-2">
+          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+          <span className="text-[9px] font-black text-accent uppercase tracking-widest">Live: On Time</span>
         </div>
 
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-4">
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-6">
             <div className={cn(
               "relative flex items-center justify-center transition-all group-hover:scale-105",
-              "w-16 h-16"
+              "w-20 h-20"
             )}>
               {/* Score Card */}
               <div className={cn(
-                "relative rounded-lg flex flex-col items-center justify-center w-full h-full border",
+                "relative rounded-lg flex flex-col items-center justify-center w-full h-full border-2",
                 itinerary.reliabilityScore >= 9.5 
                   ? "bg-green-950/40 border-green-700/50" 
                   : itinerary.reliabilityScore >= 8.5 
@@ -2277,12 +2277,12 @@ const ItineraryCard: React.FC<{
                 >
                   <div className={cn(
                     "font-black mono leading-none",
-                    itinerary.reliabilityScore >= 9.5 ? "text-2xl text-green-300" : itinerary.reliabilityScore >= 8.5 ? "text-2xl text-blue-300" : itinerary.reliabilityScore >= 7 ? "text-2xl text-amber-300" : "text-xl text-orange-300"
+                    itinerary.reliabilityScore >= 9.5 ? "text-3xl text-green-300" : itinerary.reliabilityScore >= 8.5 ? "text-3xl text-blue-300" : itinerary.reliabilityScore >= 7 ? "text-3xl text-amber-300" : "text-3xl text-orange-300"
                   )}>
                     {itinerary.reliabilityScore.toFixed(2)}
                   </div>
                   <div className={cn(
-                    "text-[7px] font-black uppercase tracking-widest mt-0.5 leading-none",
+                    "text-[8px] font-black uppercase tracking-widest mt-1 leading-none",
                     itinerary.reliabilityScore >= 9.5 ? "text-green-300" : itinerary.reliabilityScore >= 8.5 ? "text-blue-300" : itinerary.reliabilityScore >= 7 ? "text-amber-300" : "text-orange-300"
                   )}>
                     Score
@@ -2295,58 +2295,58 @@ const ItineraryCard: React.FC<{
                 <motion.div 
                   animate={{ y: [0, -4, 0] }}
                   transition={{ duration: 2, repeat: Infinity }}
-                  className="absolute -top-2 -right-2 bg-green-700 text-white text-[7px] font-black px-2 py-0.5 rounded-full shadow-sm shadow-green-900/40 uppercase tracking-tighter"
+                  className="absolute -top-3 -right-3 bg-green-700 text-white text-[8px] font-black px-3 py-1 rounded-full shadow-sm shadow-green-900/40 uppercase tracking-tighter"
                 >
                   ★ Best
                 </motion.div>
               )}
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-xl font-bold mono">
+              <div className="flex items-center gap-3">
+                <h3 className="text-2xl font-black mono">
                   {firstLeg.departure.airport} → {lastLeg.arrival.airport}
                 </h3>
-                <Badge variant={statusColors[itinerary.status]}>{itinerary.status}</Badge>
+                <Badge variant={statusColors[itinerary.status]} className="text-xs py-1 px-3">{itinerary.status}</Badge>
                 {itinerary.reliabilityScore >= 9.5 && (
-                  <Badge variant="success" className="bg-green-500/10 text-green-500 border-green-500/20">Top Choice</Badge>
+                  <Badge variant="success" className="bg-green-500/10 text-green-500 border-green-500/20 text-xs py-1 px-3">Top Choice</Badge>
                 )}
               </div>
-              <div className="flex items-center gap-2 mt-1">
-                <span className="text-[10px] font-bold text-accent uppercase tracking-widest">
+              <div className="flex items-center gap-3 mt-2">
+                <span className="text-xs font-black text-accent uppercase tracking-widest">
                   {itinerary.legs.map(l => l.airline).filter((v, i, a) => a.indexOf(v) === i).join(' + ')}
                 </span>
                 {isConnecting && (
-                  <span className="text-[8px] text-white/60 uppercase font-bold">
+                  <span className="text-xs text-white/60 uppercase font-bold">
                     • {itinerary.legs.length - 1} Stop{itinerary.legs.length > 2 ? 's' : ''}
                   </span>
                 )}
                 {firstLeg && firstLeg.departure && firstLeg.departure.scheduled && (
-                  <span className="text-[8px] text-white/60 uppercase font-bold flex items-center gap-1">
-                    • <Calendar className="w-2 h-2" /> {format(parseISO(firstLeg.departure.scheduled), 'dd MMM')}
+                  <span className="text-xs text-white/60 uppercase font-bold flex items-center gap-2">
+                    • <Calendar className="w-3 h-3" /> {format(parseISO(firstLeg.departure.scheduled), 'dd MMM')}
                   </span>
                 )}
               </div>
-              <p className="text-white/80 text-[10px] uppercase tracking-wider font-medium mt-1">
+              <p className="text-white/80 text-xs uppercase tracking-wider font-medium mt-2">
                 {riskLabels[itinerary.status]}
               </p>
             </div>
           </div>
-          <div className="text-right flex flex-col items-end gap-2">
+          <div className="text-right flex flex-col items-end gap-3">
             <div>
-              <div className="text-xs text-white/60 mono mb-1">EST. PRICE</div>
-              <div className="text-lg font-bold mono text-accent">RM{itinerary.price}</div>
+              <div className="text-xs text-white/60 mono mb-1 font-bold">EST. PRICE</div>
+              <div className="text-2xl font-black mono text-accent">RM{itinerary.price}</div>
             </div>
             {onSave && (
               <button
                 onClick={onSave}
                 className={cn(
-                  "flex items-center gap-1.5 px-2 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all border",
+                  "flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest transition-all border",
                   isSaved 
                     ? "bg-red-500/10 text-red-500 border-red-500/20" 
                     : "bg-white/5 text-muted border-white/10 hover:bg-accent/10 hover:text-accent hover:border-accent/20"
                 )}
               >
-                <Heart className={cn("w-3 h-3", isSaved && "fill-current")} />
+                <Heart className={cn("w-4 h-4", isSaved && "fill-current")} />
                 {isSaved ? "Saved" : "Save"}
               </button>
             )}
@@ -2354,23 +2354,23 @@ const ItineraryCard: React.FC<{
         </div>
 
         <div className="grid grid-cols-1 gap-4">
-          <div className="flex items-center justify-between text-xs mono text-white/90 bg-white/5 p-3 rounded-lg">
-            <div className="flex items-center gap-6">
+          <div className="flex items-center justify-between text-sm mono text-white/90 bg-white/5 p-4 rounded-lg">
+            <div className="flex items-center gap-8">
               <div className="flex items-center gap-2">
-                <Clock className="w-3 h-3 text-accent" />
+                <Clock className="w-4 h-4 text-accent" />
                 <span>DEP: {format(parseISO(firstLeg.departure.scheduled), 'HH:mm')} • {format(parseISO(firstLeg.departure.scheduled), 'dd MMM yyyy')}</span>
               </div>
               <div className="flex items-center gap-2">
-                <TrendingDown className="w-3 h-3 text-accent" />
+                <TrendingDown className="w-4 h-4 text-accent" />
                 <span>RISK: {itinerary.connectionRiskValue}%</span>
               </div>
             </div>
             {onRemove && (
               <button
                 onClick={onRemove}
-                className="flex items-center gap-1.5 px-3 py-1 bg-red-500/10 text-red-500 rounded-lg transition-all hover:bg-red-500 hover:text-white border border-red-500/20 text-[8px] font-black uppercase tracking-widest"
+                className="flex items-center gap-2 px-4 py-2 bg-red-500/10 text-red-500 rounded-lg transition-all hover:bg-red-500 hover:text-white border border-red-500/20 text-xs font-black uppercase tracking-widest"
               >
-                <Trash2 className="w-3 h-3" />
+                <Trash2 className="w-4 h-4" />
                 Remove Trip
               </button>
             )}
