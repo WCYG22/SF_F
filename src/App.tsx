@@ -1141,6 +1141,10 @@ export default function App() {
                         value={filterAirline}
                         onChange={(e) => setFilterAirline(e.target.value)}
                         className="bg-background border-2 border-white/20 rounded-xl px-4 py-3 text-base font-semibold text-white focus:border-accent outline-none transition-all hover:border-white/40"
+                        style={{
+                          colorScheme: 'dark',
+                          backgroundColor: '#0f172a',
+                        }}
                       >
                         <option value="">All Airlines</option>
                         {uniqueAirlines.map(airline => (
@@ -1155,6 +1159,10 @@ export default function App() {
                         value={filterStops === null ? "" : filterStops}
                         onChange={(e) => setFilterStops(e.target.value === "" ? null : parseInt(e.target.value))}
                         className="bg-background border-2 border-white/20 rounded-xl px-4 py-3 text-base font-semibold text-white focus:border-accent outline-none transition-all hover:border-white/40"
+                        style={{
+                          colorScheme: 'dark',
+                          backgroundColor: '#0f172a',
+                        }}
                       >
                         <option value="">Any Stops</option>
                         <option value="0">Non-stop</option>
@@ -1169,6 +1177,10 @@ export default function App() {
                         value={filterTimeOfDay || ""}
                         onChange={(e) => setFilterTimeOfDay(e.target.value as any || null)}
                         className="bg-background border-2 border-white/20 rounded-xl px-4 py-3 text-base font-semibold text-white focus:border-accent outline-none transition-all hover:border-white/40"
+                        style={{
+                          colorScheme: 'dark',
+                          backgroundColor: '#0f172a',
+                        }}
                       >
                         <option value="">Any Time</option>
                         <option value="morning">Morning (6am-12pm)</option>
@@ -1427,6 +1439,10 @@ export default function App() {
                     value={savedFilterAirline}
                     onChange={(e) => setSavedFilterAirline(e.target.value)}
                     className="bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-xs focus:border-accent outline-none transition-all"
+                    style={{
+                      colorScheme: 'dark',
+                      backgroundColor: '#0f172a',
+                    }}
                   >
                     <option value="">All Airlines</option>
                     {Array.from(new Set(savedItineraries.flatMap(s => s.legs.map(l => l.airline)))).map(airline => (
