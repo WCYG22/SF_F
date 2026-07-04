@@ -1696,15 +1696,15 @@ export default function App() {
                     </button>
                   </div>
                 ) : (
-                  <div className="max-w-md mx-auto py-4">
-                    <div className="text-center mb-6">
-                      <div className="w-12 h-12 bg-accent/15 rounded-2xl flex items-center justify-center mx-auto mb-3">
-                        <Lock className="w-6 h-6 text-accent" />
+                  <div className="max-w-2xl mx-auto py-8">
+                    <div className="text-center mb-8">
+                      <div className="w-16 h-16 bg-accent/15 rounded-3xl flex items-center justify-center mx-auto mb-4">
+                        <Lock className="w-8 h-8 text-accent" />
                       </div>
-                      <h3 className="text-lg font-bold">
-                        {authMode === 'forgot' ? "Reset Password" : "Authentication Portal"}
+                      <h3 className="text-2xl font-black mb-2">
+                        {authMode === 'forgot' ? "Reset Your Password" : "Authentication Portal"}
                       </h3>
-                      <p className="text-white/60 text-xs mt-1">
+                      <p className="text-white/60 text-sm leading-relaxed">
                         {authMode === 'forgot' 
                           ? "Enter your email address and we'll send you a link to reset your password."
                           : "Valid user credentials required for access to account-based functions"
@@ -1714,34 +1714,34 @@ export default function App() {
 
                     {/* Tabs */}
                     {authMode !== 'forgot' && (
-                      <div className="flex p-1 bg-white/5 rounded-xl mb-6 border border-white/5">
+                      <div className="flex p-1.5 bg-white/5 rounded-xl mb-8 border border-white/5 gap-1">
                         <button
                           type="button"
                           onClick={() => { setAuthMode('login'); setAuthError(null); setAuthSuccess(null); setIsAuthNotAllowedError(false); }}
-                          className={cn("flex-1 py-2 text-[10px] font-extrabold uppercase tracking-wider rounded-lg transition-all", authMode === 'login' ? "bg-accent text-white" : "text-white/60 hover:text-white")}
+                          className={cn("flex-1 py-3 text-xs font-extrabold uppercase tracking-wider rounded-lg transition-all", authMode === 'login' ? "bg-accent text-white" : "text-white/60 hover:text-white")}
                         >
-                          User Login & Authentication
+                          User Login
                         </button>
                         <button
                           type="button"
                           onClick={() => { setAuthMode('register'); setAuthError(null); setAuthSuccess(null); setIsAuthNotAllowedError(false); }}
-                          className={cn("flex-1 py-2 text-[10px] font-extrabold uppercase tracking-wider rounded-lg transition-all", authMode === 'register' ? "bg-accent text-white" : "text-white/60 hover:text-white")}
+                          className={cn("flex-1 py-3 text-xs font-extrabold uppercase tracking-wider rounded-lg transition-all", authMode === 'register' ? "bg-accent text-white" : "text-white/60 hover:text-white")}
                         >
-                          Account Registration
+                          Create Account
                         </button>
                       </div>
                     )}
 
                     {authMode === 'forgot' ? (
-                      <form onSubmit={handlePasswordReset} className="space-y-4">
+                      <form onSubmit={handlePasswordReset} className="space-y-6">
                         {authError && (
-                          <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl text-xs flex flex-col gap-2">
+                          <div className="p-4 bg-red-500/10 border border-red-500/20 text-red-400 rounded-2xl text-xs flex flex-col gap-2">
                             <div className="flex items-start gap-2">
-                              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                              <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
                               <span>{authError}</span>
                             </div>
                             {isAuthNotAllowedError && (
-                              <div className="mt-1 pl-6 text-[11px] text-white/70 space-y-2">
+                              <div className="mt-1 pl-6 text-xs text-white/70 space-y-2">
                                 <p>To enable Email/Password Authentication for this project, follow these simple steps:</p>
                                 <ol className="list-decimal list-inside space-y-1 text-white/80">
                                   <li>Open the <a href="https://console.firebase.google.com/project/gen-lang-client-0507391171/authentication/providers" target="_blank" rel="noopener noreferrer" className="text-accent underline hover:text-accent/80 font-bold">Firebase Authentication Console</a> in a new tab.</li>
@@ -1756,23 +1756,23 @@ export default function App() {
                         )}
 
                         {authSuccess && (
-                          <div className="p-3 bg-green-500/10 border border-green-500/20 text-green-400 rounded-xl text-xs flex items-start gap-2">
-                            <Info className="w-4 h-4 shrink-0 mt-0.5" />
+                          <div className="p-4 bg-green-500/10 border border-green-500/20 text-green-400 rounded-2xl text-xs flex items-start gap-2">
+                            <Info className="w-5 h-5 shrink-0 mt-0.5" />
                             <span>{authSuccess}</span>
                           </div>
                         )}
 
-                        <div className="space-y-1">
-                          <label className="text-[10px] font-black text-white/50 uppercase tracking-widest pl-1">Email address</label>
+                        <div className="space-y-2">
+                          <label className="text-xs font-black text-white/50 uppercase tracking-widest pl-1">Email address</label>
                           <div className="relative">
-                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+                            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/30" />
                             <input 
                               type="email"
                               required
                               placeholder="user@smartflight.com"
                               value={authEmail}
                               onChange={(e) => setAuthEmail(e.target.value)}
-                              className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-white/30 focus:border-accent outline-none transition-all"
+                              className="w-full bg-white/5 border border-white/10 rounded-xl pl-14 pr-4 py-3.5 text-sm text-white placeholder-white/30 focus:border-accent outline-none transition-all"
                             />
                           </div>
                         </div>
@@ -1780,7 +1780,7 @@ export default function App() {
                         <button
                           type="submit"
                           disabled={authActionLoading}
-                          className="w-full bg-accent text-white py-3 rounded-xl font-bold uppercase tracking-widest hover:bg-accent/80 transition-all disabled:opacity-50 text-xs mt-2"
+                          className="w-full bg-accent text-white py-3.5 rounded-xl font-bold uppercase tracking-widest hover:bg-accent/80 transition-all disabled:opacity-50 text-sm mt-4"
                         >
                           {authActionLoading ? (
                             <Activity className="w-5 h-5 animate-spin mx-auto" />
@@ -1789,26 +1789,26 @@ export default function App() {
                           )}
                         </button>
 
-                        <div className="text-center pt-2">
+                        <div className="text-center pt-3">
                           <button
                             type="button"
                             onClick={() => { setAuthMode('login'); setAuthError(null); setAuthSuccess(null); setIsAuthNotAllowedError(false); }}
-                            className="text-[10px] font-bold text-accent hover:underline uppercase tracking-widest inline-flex items-center gap-1"
+                            className="text-xs font-bold text-accent hover:underline uppercase tracking-widest inline-flex items-center gap-1"
                           >
                             ← Back to Login
                           </button>
                         </div>
                       </form>
                     ) : (
-                      <form onSubmit={handleCredentialsAuth} className="space-y-4">
+                      <form onSubmit={handleCredentialsAuth} className="space-y-6">
                         {authError && (
-                          <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl text-xs flex flex-col gap-2">
+                          <div className="p-4 bg-red-500/10 border border-red-500/20 text-red-400 rounded-2xl text-xs flex flex-col gap-2">
                             <div className="flex items-start gap-2">
-                              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                              <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
                               <span>{authError}</span>
                             </div>
                             {isAuthNotAllowedError && (
-                              <div className="mt-1 pl-6 text-[11px] text-white/70 space-y-2">
+                              <div className="mt-1 pl-6 text-xs text-white/70 space-y-2">
                                 <p>To enable Email/Password Authentication for this project, follow these simple steps:</p>
                                 <ol className="list-decimal list-inside space-y-1 text-white/80">
                                   <li>Open the <a href="https://console.firebase.google.com/project/gen-lang-client-0507391171/authentication/providers" target="_blank" rel="noopener noreferrer" className="text-accent underline hover:text-accent/80 font-bold">Firebase Authentication Console</a> in a new tab.</li>
@@ -1823,65 +1823,65 @@ export default function App() {
                         )}
 
                         {authSuccess && (
-                          <div className="p-3 bg-green-500/10 border border-green-500/20 text-green-400 rounded-xl text-xs flex items-start gap-2">
-                            <Info className="w-4 h-4 shrink-0 mt-0.5" />
+                          <div className="p-4 bg-green-500/10 border border-green-500/20 text-green-400 rounded-2xl text-xs flex items-start gap-2">
+                            <Info className="w-5 h-5 shrink-0 mt-0.5" />
                             <span>{authSuccess}</span>
                           </div>
                         )}
 
-                        <div className="space-y-1">
-                          <label className="text-[10px] font-black text-white/50 uppercase tracking-widest pl-1">Email address</label>
+                        <div className="space-y-2">
+                          <label className="text-xs font-black text-white/50 uppercase tracking-widest pl-1">Email address</label>
                           <div className="relative">
-                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+                            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/30" />
                             <input 
                               type="email"
                               required
                               placeholder="user@smartflight.com"
                               value={authEmail}
                               onChange={(e) => setAuthEmail(e.target.value)}
-                              className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-white/30 focus:border-accent outline-none transition-all"
+                              className="w-full bg-white/5 border border-white/10 rounded-xl pl-14 pr-4 py-3.5 text-sm text-white placeholder-white/30 focus:border-accent outline-none transition-all"
                             />
                           </div>
                         </div>
 
-                        <div className="space-y-1">
+                        <div className="space-y-2">
                           <div className="flex justify-between items-center pl-1">
-                            <label className="text-[10px] font-black text-white/50 uppercase tracking-widest">Password</label>
+                            <label className="text-xs font-black text-white/50 uppercase tracking-widest">Password</label>
                             {authMode === 'login' && (
                               <button
                                 type="button"
                                 onClick={() => { setAuthMode('forgot'); setAuthError(null); setAuthSuccess(null); setIsAuthNotAllowedError(false); }}
-                                className="text-[9px] font-bold text-accent hover:underline uppercase tracking-widest"
+                                className="text-xs font-bold text-accent hover:underline uppercase tracking-widest"
                               >
                                 Forgot Password?
                               </button>
                             )}
                           </div>
                           <div className="relative">
-                            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+                            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/30" />
                             <input 
                               type="password"
                               required
                               placeholder="••••••••"
                               value={authPassword}
                               onChange={(e) => setAuthPassword(e.target.value)}
-                              className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-white/30 focus:border-accent outline-none transition-all"
+                              className="w-full bg-white/5 border border-white/10 rounded-xl pl-14 pr-4 py-3.5 text-sm text-white placeholder-white/30 focus:border-accent outline-none transition-all"
                             />
                           </div>
                         </div>
 
                         {authMode === 'register' && (
-                          <div className="space-y-1">
-                            <label className="text-[10px] font-black text-white/50 uppercase tracking-widest pl-1">Confirm Password</label>
+                          <div className="space-y-2">
+                            <label className="text-xs font-black text-white/50 uppercase tracking-widest pl-1">Confirm Password</label>
                             <div className="relative">
-                              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+                              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/30" />
                               <input 
                                 type="password"
                                 required
                                 placeholder="••••••••"
                                 value={authConfirmPassword}
                                 onChange={(e) => setAuthConfirmPassword(e.target.value)}
-                                className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-white/30 focus:border-accent outline-none transition-all"
+                                className="w-full bg-white/5 border border-white/10 rounded-xl pl-14 pr-4 py-3.5 text-sm text-white placeholder-white/30 focus:border-accent outline-none transition-all"
                               />
                             </div>
                           </div>
@@ -1890,7 +1890,7 @@ export default function App() {
                         <button
                           type="submit"
                           disabled={authActionLoading}
-                          className="w-full bg-accent text-white py-3 rounded-xl font-bold uppercase tracking-widest hover:bg-accent/80 transition-all disabled:opacity-50 text-xs mt-2"
+                          className="w-full bg-accent text-white py-3.5 rounded-xl font-bold uppercase tracking-widest hover:bg-accent/80 transition-all disabled:opacity-50 text-sm mt-4"
                         >
                           {authActionLoading ? (
                             <Activity className="w-5 h-5 animate-spin mx-auto" />
