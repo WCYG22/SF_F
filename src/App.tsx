@@ -1906,54 +1906,80 @@ export default function App() {
                 )}
               </Card>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Search History Card */}
-                <Card className="border-white/10 bg-gradient-to-br from-accent/10 via-background to-background hover:border-accent/40 transition-all">
-                  <div className="space-y-4">
+                <Card className="border-white/10 bg-gradient-to-br from-accent/10 via-background to-background hover:border-accent/40 transition-all group">
+                  <div className="space-y-6">
                     <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-accent/20 rounded-lg flex items-center justify-center border border-accent/30">
-                          <Activity className="w-5 h-5 text-accent" />
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-accent/20 rounded-xl flex items-center justify-center border border-accent/30 group-hover:bg-accent/30 transition-all">
+                          <Activity className="w-6 h-6 text-accent" />
                         </div>
                         <div>
-                          <h4 className="text-sm font-bold uppercase tracking-widest">Search History</h4>
-                          <p className="text-[10px] text-white/50 font-bold">Recent searches</p>
+                          <h4 className="text-lg font-black uppercase tracking-widest">Search History</h4>
+                          <p className="text-xs text-white/50 font-bold">Recent searches</p>
                         </div>
                       </div>
                     </div>
-                    <p className="text-[11px] text-white/70 leading-relaxed">
-                      Track your recent flight searches and view saved itineraries. Keep your travel history organized in one place.
+                    <p className="text-sm text-white/70 leading-relaxed">
+                      Track your recent flight searches and view saved itineraries. Keep your travel history organized in one place for quick access.
                     </p>
-                    <div className="pt-2 border-t border-accent/20">
-                      <button className="text-[10px] font-bold text-accent hover:text-accent/80 uppercase tracking-widest flex items-center gap-1.5 transition-all">
-                        <span>View History</span>
-                        <ChevronRight className="w-3 h-3" />
+                    
+                    {/* Stats */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="p-3 bg-accent/10 rounded-lg border border-accent/20">
+                        <div className="text-xs text-white/50 font-bold uppercase mb-1">Recent Searches</div>
+                        <div className="text-2xl font-black mono text-accent">12</div>
+                      </div>
+                      <div className="p-3 bg-accent/10 rounded-lg border border-accent/20">
+                        <div className="text-xs text-white/50 font-bold uppercase mb-1">This Month</div>
+                        <div className="text-2xl font-black mono text-accent">8</div>
+                      </div>
+                    </div>
+
+                    <div className="pt-4 border-t border-accent/20">
+                      <button className="w-full py-3 px-4 bg-accent/20 hover:bg-accent/30 text-accent hover:text-accent font-bold uppercase tracking-widest rounded-lg text-xs transition-all flex items-center justify-center gap-2">
+                        <span>View Full History</span>
+                        <ChevronRight className="w-4 h-4" />
                       </button>
                     </div>
                   </div>
                 </Card>
 
                 {/* Price Alerts Card */}
-                <Card className="border-white/10 bg-gradient-to-br from-blue-500/10 via-background to-background hover:border-blue-500/40 transition-all">
-                  <div className="space-y-4">
+                <Card className="border-white/10 bg-gradient-to-br from-blue-500/10 via-background to-background hover:border-blue-500/40 transition-all group">
+                  <div className="space-y-6">
                     <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center border border-blue-500/30">
-                          <TrendingDown className="w-5 h-5 text-blue-400" />
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center border border-blue-500/30 group-hover:bg-blue-500/30 transition-all">
+                          <TrendingDown className="w-6 h-6 text-blue-400" />
                         </div>
                         <div>
-                          <h4 className="text-sm font-bold uppercase tracking-widest">Price Alerts</h4>
-                          <p className="text-[10px] text-white/50 font-bold">Smart notifications</p>
+                          <h4 className="text-lg font-black uppercase tracking-widest">Price Alerts</h4>
+                          <p className="text-xs text-white/50 font-bold">Smart notifications</p>
                         </div>
                       </div>
                     </div>
-                    <p className="text-[11px] text-white/70 leading-relaxed">
-                      Get real-time price drop alerts for your favorite routes. We'll notify you when fares decrease.
+                    <p className="text-sm text-white/70 leading-relaxed">
+                      Get real-time price drop alerts for your favorite routes. We'll notify you when fares decrease significantly.
                     </p>
-                    <div className="pt-2 border-t border-blue-500/20">
-                      <button className="text-[10px] font-bold text-blue-400 hover:text-blue-300 uppercase tracking-widest flex items-center gap-1.5 transition-all">
+
+                    {/* Stats */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="p-3 bg-blue-500/10 rounded-lg border border-blue-500/20">
+                        <div className="text-xs text-white/50 font-bold uppercase mb-1">Active Alerts</div>
+                        <div className="text-2xl font-black mono text-blue-400">5</div>
+                      </div>
+                      <div className="p-3 bg-blue-500/10 rounded-lg border border-blue-500/20">
+                        <div className="text-xs text-white/50 font-bold uppercase mb-1">Savings Found</div>
+                        <div className="text-2xl font-black mono text-blue-400">RM380</div>
+                      </div>
+                    </div>
+
+                    <div className="pt-4 border-t border-blue-500/20">
+                      <button className="w-full py-3 px-4 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 hover:text-blue-300 font-bold uppercase tracking-widest rounded-lg text-xs transition-all flex items-center justify-center gap-2">
                         <span>Manage Alerts</span>
-                        <ChevronRight className="w-3 h-3" />
+                        <ChevronRight className="w-4 h-4" />
                       </button>
                     </div>
                   </div>
