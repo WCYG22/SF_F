@@ -21,11 +21,14 @@
       ]
     },
     "allowImportingTsExtensions": true,
-    "noEmit": true
+    "noEmit": true,
+    "noImplicitAny": false
   },
+  "include": ["src/**/*", "server.ts"],
   "exclude": [
     "node_modules",
     "dist",
-    "api"
+    "api",
+    "api/**/*"
   ]
 }

@@ -6,10 +6,24 @@
   "typescript": {
     "version": "5.8.3"
   },
+  "functions": {
+    "api/search.js": {
+      "memory": 1024,
+      "maxDuration": 30
+    },
+    "api/tracking.js": {
+      "memory": 1024,
+      "maxDuration": 30
+    }
+  },
   "rewrites": [
     {
-      "source": "/api/:path*",
-      "destination": "api/:path*.js"
+      "source": "/api/search",
+      "destination": "/api/search.js"
+    },
+    {
+      "source": "/api/tracking",
+      "destination": "/api/tracking.js"
     },
     {
       "source": "/:path*",
