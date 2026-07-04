@@ -1,34 +1,15 @@
 {
-  "buildCommand": "npm run build",
+  "buildCommand": "bash build.sh",
   "outputDirectory": "dist",
   "installCommand": "npm install",
-  "framework": "vite",
-  "ignoreCommand": "git diff --quiet HEAD^ HEAD -- ':!api/'",
+  "framework": null,
   "typescript": {
     "ignoreBuildErrors": true
   },
   "functions": {
-    "api/search.js": {
-      "memory": 1024,
-      "maxDuration": 30
-    },
-    "api/tracking.js": {
+    "api/**/*.js": {
       "memory": 1024,
       "maxDuration": 30
     }
-  },
-  "rewrites": [
-    {
-      "source": "/api/search",
-      "destination": "/api/search.js"
-    },
-    {
-      "source": "/api/tracking",
-      "destination": "/api/tracking.js"
-    },
-    {
-      "source": "/:path*",
-      "destination": "/index.html"
-    }
-  ]
+  }
 }
