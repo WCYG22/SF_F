@@ -1551,22 +1551,23 @@ export default function App() {
                     <Activity className="w-8 h-8 text-accent animate-spin" />
                   </div>
                 ) : user ? (
-                  <div className="space-y-8">
-                    <div className="flex items-center gap-6">
-                      <div className="w-20 h-20 bg-accent/20 rounded-3xl flex items-center justify-center border border-accent/30 overflow-hidden">
+                  <div className="space-y-6">
+                    {/* User Profile Card */}
+                    <div className="flex items-center gap-6 p-6 bg-gradient-to-r from-accent/10 to-background border border-accent/20 rounded-2xl">
+                      <div className="w-24 h-24 bg-accent/20 rounded-2xl flex items-center justify-center border-2 border-accent/30 overflow-hidden shrink-0">
                         {user.photoURL ? (
                           <img src={user.photoURL} alt="Smart Flight User" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                         ) : (
-                          <UserIcon className="w-10 h-10 text-accent" />
+                          <UserIcon className="w-12 h-12 text-accent" />
                         )}
                       </div>
-                      <div className="space-y-1">
-                        <h3 className="text-xl font-bold">{user.email?.split('@')[0] || 'SmartFlight User'}</h3>
-                        <p className="text-muted mono text-xs">{user.email}</p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <div className={cn("w-2.5 h-2.5 rounded-full animate-pulse", user.emailVerified ? "bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]" : "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]")} />
-                          <span className={cn("text-[10px] font-bold uppercase tracking-widest", user.emailVerified ? "text-green-500" : "text-amber-500")}>
-                            {user.emailVerified ? "Verified Account" : "Verification Required"}
+                      <div className="flex-1">
+                        <h3 className="text-2xl font-black mb-1">{user.email?.split('@')[0] || 'SmartFlight User'}</h3>
+                        <p className="text-white/60 mono text-sm mb-3">{user.email}</p>
+                        <div className="flex items-center gap-2">
+                          <div className={cn("w-3 h-3 rounded-full animate-pulse", user.emailVerified ? "bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]" : "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]")} />
+                          <span className={cn("text-xs font-black uppercase tracking-widest", user.emailVerified ? "text-green-500" : "text-amber-500")}>
+                            {user.emailVerified ? "✓ Verified Account" : "⚠ Verification Required"}
                           </span>
                         </div>
                       </div>
@@ -1642,15 +1643,11 @@ export default function App() {
                     )}
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-white/5">
-                      <div className="p-4 bg-white/5 rounded-2xl">
-                        <div className="text-[10px] font-black text-muted uppercase tracking-widest mb-1">Total Saved</div>
-                        <div className="text-2xl font-black mono">{savedItineraries.length}</div>
-                      </div>
                     </div>
 
                     <button 
                       onClick={handleSignOut}
-                      className="w-full flex items-center justify-center gap-3 bg-red-500/10 text-red-500 py-4 rounded-2xl font-bold uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all border border-red-500/20 text-xs"
+                      className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-red-500/20 to-red-500/10 text-red-400 py-4 rounded-2xl font-black uppercase tracking-widest hover:from-red-500/30 hover:to-red-500/20 hover:text-red-300 transition-all border border-red-500/30 text-sm mt-6"
                     >
                       <LogOut className="w-5 h-5" />
                       Sign Out of Smart Flight
