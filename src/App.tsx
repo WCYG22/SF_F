@@ -26,6 +26,7 @@ import {
   ShieldAlert,
   ChevronDown,
   Check,
+  Bell,
 } from 'lucide-react';
 import { format, parseISO, addMonths, addDays } from 'date-fns';
 import { searchFlight, Itinerary, FlightLeg } from './services/flightService';
@@ -94,6 +95,8 @@ export default function App() {
   const [showPriceAlerts, setShowPriceAlerts] = useState(false);
   const [selectedHistoryItems, setSelectedHistoryItems] = useState<Set<number>>(new Set());
   const [selectedAlertItems, setSelectedAlertItems] = useState<Set<number>>(new Set());
+  const [showPriceAlertModal, setShowPriceAlertModal] = useState(false);
+  const [targetPrice, setTargetPrice] = useState<string>('');
 
   // Navigation State
   const [activeTab, setActiveTab] = useState<'search' | 'live' | 'saved' | 'profile'>('search');
@@ -106,6 +109,7 @@ export default function App() {
   // Firebase State
   const [user, setUser] = useState<User | null>(null);
   const [savedItineraries, setSavedItineraries] = useState<any[]>([]);
+  const [priceAlerts, setPriceAlerts] = useState<any[]>([]);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [showSavedOnly, setShowSavedOnly] = useState(false);
   const [hasApiKey, setHasApiKey] = useState(false);
@@ -150,6 +154,21 @@ export default function App() {
       setSavedItineraries(saved);
     }, (error) => {
       handleFirestoreError(error, OperationType.LIST, 'saved_itineraries');
+    });
+
+    return () => unsubscribe();
+  }, [user]);
+
+  useEffect(() => {
+    if (!user) {
+      setPriceAlerts([]);
+      return;
+    }
+
+    const q = query(collection(db, 'price_alerts'), where('uid', '==', user.uid));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const alerts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setPriceAlerts(alerts);
     });
 
     return () => unsubscribe();
@@ -549,6 +568,49 @@ export default function App() {
     const path = `saved_itineraries/${savedId}`;
     try {
       await deleteDoc(doc(db, 'saved_itineraries', savedId));
+    } catch (error) {
+      handleFirestoreError(error, OperationType.DELETE, path);
+    }
+  };
+
+  const handleSetPriceAlert = async (itinerary: Itinerary, targetPrice: number) => {
+    if (!user) {
+      setActiveTab('profile');
+      setError("User login and authentication are required to set price alerts.");
+      return;
+    }
+
+    if (!user.emailVerified) {
+      setActiveTab('profile');
+      setError("Valid email verification is required to access account-based functions.");
+      return;
+    }
+
+    const docId = `${user.uid}_${itinerary.id}_${Date.now()}`;
+    const path = `price_alerts/${docId}`;
+    
+    try {
+      await setDoc(doc(db, 'price_alerts', docId), {
+        uid: user.uid,
+        itineraryId: itinerary.id,
+        origin: itinerary.legs[0].departure.airport,
+        destination: itinerary.legs[itinerary.legs.length - 1].arrival.airport,
+        currentPrice: itinerary.price,
+        targetPrice: targetPrice,
+        reliabilityScore: itinerary.reliabilityScore,
+        status: 'active',
+        createdAt: serverTimestamp(),
+      });
+      setError(null);
+    } catch (error) {
+      handleFirestoreError(error, OperationType.CREATE, path);
+    }
+  };
+
+  const handleDeletePriceAlert = async (alertId: string) => {
+    const path = `price_alerts/${alertId}`;
+    try {
+      await deleteDoc(doc(db, 'price_alerts', alertId));
     } catch (error) {
       handleFirestoreError(error, OperationType.DELETE, path);
     }
@@ -2447,6 +2509,13 @@ function ItineraryDetailView({
           >
             <Mail className="w-4 h-4" />
             Share
+          </button>
+          <button 
+            onClick={() => setShowPriceAlertModal(true)}
+            className="flex items-center gap-2 bg-white/5 text-white px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-white/10 hover:border-accent/50 transition-all border border-white/10"
+          >
+            <Bell className="w-4 h-4" />
+            Set Alert
           </button>
           <button 
             onClick={onSave}
