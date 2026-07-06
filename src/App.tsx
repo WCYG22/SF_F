@@ -859,6 +859,7 @@ export default function App() {
               onSave={() => handleSaveItinerary(selectedItinerary)}
               onShare={() => handleShareEmail(selectedItinerary)}
               onSelectAlternative={(alt) => setSelectedItinerary(alt)}
+              onSetPriceAlert={() => setShowPriceAlertModal(true)}
               isSaved={savedItineraries.some(s => s.itineraryId === selectedItinerary.id)}
               searchDate={date}
             />
@@ -2551,6 +2552,7 @@ function ItineraryDetailView({
   onSave, 
   onShare,
   onSelectAlternative,
+  onSetPriceAlert,
   isSaved,
   searchDate
 }: { 
@@ -2560,6 +2562,7 @@ function ItineraryDetailView({
   onSave: () => void,
   onShare: () => void,
   onSelectAlternative: (alt: Itinerary) => void,
+  onSetPriceAlert: () => void,
   isSaved: boolean,
   searchDate?: string
 }) {
@@ -2612,7 +2615,7 @@ function ItineraryDetailView({
             Share
           </button>
           <button 
-            onClick={() => setShowPriceAlertModal(true)}
+            onClick={onSetPriceAlert}
             className="flex items-center gap-2 bg-white/5 text-white px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-white/10 hover:border-accent/50 transition-all border border-white/10"
           >
             <Bell className="w-4 h-4" />
