@@ -796,6 +796,23 @@ export default function App() {
       <div className="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] bg-accent/10 blur-[120px] rounded-full pointer-events-none" />
       <div className="fixed bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-500/5 blur-[120px] rounded-full pointer-events-none" />
 
+      {/* Success/Error Toast Notifications */}
+      <AnimatePresence>
+        {successMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: -50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -50 }}
+            className="fixed top-24 left-1/2 -translate-x-1/2 z-[100] max-w-md w-full mx-4"
+          >
+            <div className="p-4 bg-green-500/90 backdrop-blur-xl border border-green-400/20 rounded-2xl flex items-center gap-3 text-white text-sm font-medium shadow-2xl">
+              <Bell className="w-5 h-5 shrink-0" />
+              <p>{successMessage}</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Top Navigation Bar */}
       <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-white/5">
         <div className="w-full px-4 h-20 flex items-center justify-between">
