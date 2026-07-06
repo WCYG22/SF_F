@@ -97,6 +97,7 @@ export default function App() {
   const [selectedAlertItems, setSelectedAlertItems] = useState<Set<number>>(new Set());
   const [showPriceAlertModal, setShowPriceAlertModal] = useState(false);
   const [targetPrice, setTargetPrice] = useState<string>('');
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   // Navigation State
   const [activeTab, setActiveTab] = useState<'search' | 'live' | 'saved' | 'profile'>('search');
@@ -602,6 +603,8 @@ export default function App() {
         createdAt: serverTimestamp(),
       });
       setError(null);
+      setSuccessMessage(`Price alert set! You'll be notified when price drops to or below RM${targetPrice}`);
+      setTimeout(() => setSuccessMessage(null), 5000);
     } catch (error) {
       handleFirestoreError(error, OperationType.CREATE, path);
     }
@@ -1154,6 +1157,13 @@ export default function App() {
                   <div className="mt-4 p-4 bg-red-500/10 border border-red-500/20 rounded-2xl flex items-center gap-3 text-red-400 text-xs">
                     <AlertCircle className="w-4 h-4 shrink-0" />
                     <p>{error}</p>
+                  </div>
+                )}
+
+                {successMessage && (
+                  <div className="mt-4 p-4 bg-green-500/10 border border-green-500/20 rounded-2xl flex items-center gap-3 text-green-400 text-xs">
+                    <Bell className="w-4 h-4 shrink-0" />
+                    <p>{successMessage}</p>
                   </div>
                 )}
 
