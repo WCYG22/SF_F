@@ -1,4 +1,4 @@
-# ✈️ Smart Flight
+# Smart Flight
 
 **Intelligent Flight Search with Reliability Insights**
 
@@ -6,40 +6,40 @@ Smart Flight is a modern flight search platform that helps users find reliable f
 
 ---
 
-## 🌟 Features
+## Features
 
-### 🔍 **Intelligent Flight Search**
+### Intelligent Flight Search
 - **Multi-route support**: One-way, round-trip, and multi-city itineraries
 - **Real-time results**: Search flights with live pricing and availability
 - **Reliability scoring**: 0-10 score based on historical data and disruption analysis
 - **Connection risk analysis**: Visual indicators for layover safety (LOW/MEDIUM/HIGH)
 - **Alternative suggestions**: Get higher reliability or better price alternatives
 
-### 📊 **Flight Reliability Insights**
+### Flight Reliability Insights
 - **Disruption probability**: Per-leg risk assessment
 - **Connection risk calculator**: Analyzes tight connections and potential delays
 - **Visual risk indicators**: Color-coded badges and progress bars
 - **Flight status tracking**: Real-time updates on delays and gate changes
 
-### 🔔 **Price Alerts**
+### Price Alerts
 - **Set target prices**: Get notified when flights drop to your desired price
 - **Real-time monitoring**: Automated price tracking via Firestore
 - **Alert management**: View, edit, and delete active price alerts
 - **Success notifications**: Floating toast confirmations for alert creation
 
-### 💾 **Save & Track**
+### Save and Track
 - **Save itineraries**: Bookmark favorite flights for quick access
 - **Search history**: Automatically tracks your searches with timestamps and result counts
 - **User profiles**: Secure authentication with Firebase Auth and email verification
 - **Cross-device sync**: Access saved data from any device in real-time
 
-### 🛫 **Live Flight Tracking**
+### Live Flight Tracking
 - **Real-time tracking**: Monitor flights in progress
 - **Aircraft details**: Model, registration, age, and specifications
 - **Flight progress**: Visual progress bar with altitude and speed
-- **Gate & terminal info**: Departure and arrival gate assignments
+- **Gate and terminal info**: Departure and arrival gate assignments
 
-### 🎨 **Modern UI/UX**
+### Modern User Interface
 - **Dark mode design**: Sleek, modern interface with glassmorphism effects
 - **Responsive layout**: Optimized for desktop, tablet, and mobile
 - **Smooth animations**: Framer Motion for delightful interactions
@@ -47,50 +47,50 @@ Smart Flight is a modern flight search platform that helps users find reliable f
 
 ---
 
-## 🚀 Tech Stack
+## Technology Stack
 
-### **Frontend**
-- **React 19** - UI framework
-- **TypeScript** - Type safety
-- **Vite** - Build tool and dev server
-- **Tailwind CSS 4** - Utility-first styling
-- **Framer Motion** - Animation library
-- **Lucide React** - Icon library
-- **date-fns** - Date formatting and manipulation
+### Frontend
+- React 19 - UI framework
+- TypeScript - Type safety
+- Vite - Build tool and dev server
+- Tailwind CSS 4 - Utility-first styling
+- Framer Motion - Animation library
+- Lucide React - Icon library
+- date-fns - Date formatting and manipulation
 
-### **Backend & Database**
-- **Firebase Authentication** - User auth with email verification
-- **Cloud Firestore** - Real-time NoSQL database
-- **Firebase Security Rules** - Data access control
-- **Google Gemini AI** - Flight search intelligence
+### Backend and Database
+- Firebase Authentication - User auth with email verification
+- Cloud Firestore - Real-time NoSQL database
+- Firebase Security Rules - Data access control
+- Google Gemini AI - Flight search intelligence
 
-### **APIs**
-- **Custom Flight Search API** - Powered by Google Gemini
-- **Flight Tracking API** - Real-time flight status
+### APIs
+- Custom Flight Search API - Powered by Google Gemini
+- Flight Tracking API - Real-time flight status
 
 ---
 
-## 📦 Installation
+## Installation
 
-### **Prerequisites**
+### Prerequisites
 - Node.js (v20+ recommended)
 - npm or yarn
 - Firebase project with Firestore enabled
 
-### **Setup**
+### Setup Instructions
 
-1. **Clone the repository**
+**1. Clone the repository**
 ```bash
 git clone https://github.com/WCYG22/SF_F.git
 cd SF_F
 ```
 
-2. **Install dependencies**
+**2. Install dependencies**
 ```bash
 npm install
 ```
 
-3. **Configure environment variables**
+**3. Configure environment variables**
 
 Create a `.env` file in the root directory:
 
@@ -107,20 +107,20 @@ PORT=3000
 NODE_ENV=development
 ```
 
-4. **Deploy Firestore Rules**
+**4. Deploy Firestore Rules**
 
-Go to [Firebase Console](https://console.firebase.google.com) → Firestore Database → Rules, and paste the content from `firestore.rules`.
+Navigate to [Firebase Console](https://console.firebase.google.com), select Firestore Database, go to the Rules tab, and paste the content from `firestore.rules`.
 
-5. **Run development server**
+**5. Run development server**
 ```bash
 npm run dev
 ```
 
-The app will be available at `http://localhost:5173`
+The application will be available at `http://localhost:5173`
 
 ---
 
-## 🏗️ Project Structure
+## Project Structure
 
 ```
 SF_F/
@@ -153,9 +153,9 @@ SF_F/
 
 ---
 
-## 🔥 Firebase Collections
+## Firebase Collections
 
-### **users**
+### users
 ```typescript
 {
   uid: string;
@@ -166,7 +166,7 @@ SF_F/
 }
 ```
 
-### **saved_itineraries**
+### saved_itineraries
 ```typescript
 {
   uid: string;
@@ -183,7 +183,7 @@ SF_F/
 }
 ```
 
-### **price_alerts**
+### price_alerts
 ```typescript
 {
   uid: string;
@@ -198,7 +198,7 @@ SF_F/
 }
 ```
 
-### **search_history**
+### search_history
 ```typescript
 {
   uid: string;
@@ -213,45 +213,45 @@ SF_F/
 
 ---
 
-## 🎯 Usage
+## Usage Guide
 
-### **Search for Flights**
+### Search for Flights
 1. Select trip type (One-way, Round-trip, Multi-city)
 2. Enter departure and destination airports
 3. Choose travel date(s)
 4. Click "Search Flights"
 5. View results sorted by reliability score
 
-### **Set Price Alerts**
-1. Find a flight you're interested in
+### Set Price Alerts
+1. Find a flight you are interested in
 2. Click "Set Alert" button
-3. Enter your target price (lower than current price)
-4. See floating toast confirmation
+3. Enter your target price (must be lower than current price)
+4. Receive floating toast confirmation
 5. Manage alerts in Profile tab
 
-### **Save Itineraries**
+### Save Itineraries
 1. Browse search results
 2. Click "Save Itinerary" on any flight
 3. Access saved flights from the "Saved" tab
-4. View details or remove trips
+4. View details or remove trips as needed
 
-### **Track Live Flights**
-1. Go to "Live" tab
+### Track Live Flights
+1. Navigate to "Live" tab
 2. Enter flight number (e.g., MH123)
 3. View real-time tracking information
 4. Monitor altitude, speed, and progress
 
-### **View Search History**
-1. Go to Profile tab
+### View Search History
+1. Navigate to Profile tab
 2. Click "View Full History"
-3. See all your past searches with timestamps
-4. Select and delete unwanted history
+3. Review all past searches with timestamps
+4. Select and delete unwanted history items
 
 ---
 
-## 🛠️ Development
+## Development
 
-### **Available Scripts**
+### Available Scripts
 
 ```bash
 # Development
@@ -266,19 +266,19 @@ npm run lint         # Check TypeScript types
 npm run clean        # Remove build artifacts
 ```
 
-### **Development Workflow**
+### Development Workflow
 
-1. **Make changes** in `src/` directory
-2. **Hot reload** automatically reflects changes
-3. **Check types** with `npm run lint`
-4. **Build** with `npm run build`
-5. **Test production** with `npm start`
+1. Make changes in `src/` directory
+2. Hot reload automatically reflects changes
+3. Check types with `npm run lint`
+4. Build with `npm run build`
+5. Test production with `npm start`
 
 ---
 
-## 🚢 Deployment
+## Deployment
 
-### **Deploy to Render**
+### Deploy to Render
 
 1. Create a new Web Service on Render
 2. Connect your GitHub repository
@@ -288,7 +288,7 @@ npm run clean        # Remove build artifacts
 4. Add environment variables from `.env`
 5. Deploy automatically on push to main
 
-### **Deploy to Vercel**
+### Deploy to Vercel
 
 1. Connect your GitHub repository to Vercel
 2. Add environment variables in Vercel dashboard
@@ -298,99 +298,100 @@ npm run clean        # Remove build artifacts
 
 ---
 
-## 🔒 Security
+## Security
 
-### **Authentication**
-- Email/password with verification required
+### Authentication
+- Email/password authentication with verification required
 - Secure password reset flow
 - Firebase Auth token management
 
-### **Database Security**
+### Database Security
 - Firestore Security Rules enforce access control
 - Users can only access their own data
 - Admin role for elevated permissions
 
-### **Environment Variables**
+### Environment Variables
 - Sensitive keys stored in `.env`
 - Never committed to version control
-- Separate configs for dev/production
+- Separate configurations for development and production
 
-### **Data Validation**
+### Data Validation
 - Client-side input validation
-- Firestore rules validate all writes
-- Type-safe TypeScript throughout
+- Firestore rules validate all write operations
+- Type-safe TypeScript throughout application
 
 ---
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
-### **Blank page after deployment**
+### Blank page after deployment
 - Check browser console for errors
-- Verify all environment variables are set
-- Ensure Firestore rules are deployed
+- Verify all environment variables are set correctly
+- Ensure Firestore rules are deployed to Firebase Console
 
-### **Firebase permission denied**
+### Firebase permission denied
 - Update Firestore rules in Firebase Console
-- Check user is authenticated
-- Verify email is verified
+- Check that user is authenticated
+- Verify email address is verified
 
-### **Price alerts not working**
+### Price alerts not working
 - Ensure Firestore rules include `price_alerts` collection
 - Check browser console for errors
-- Verify user is logged in and email verified
+- Verify user is logged in and email is verified
 
-### **Search history not showing**
+### Search history not showing
 - Deploy `search_history` rules to Firebase Console
 - Perform a search to populate history
 - Check user authentication status
 
 ---
 
-## 📝 Recent Updates
+## Recent Updates
 
-### **v2.0.0** (January 2025)
-- ✅ Implemented real search history tracking with Firestore
-- ✅ Added floating toast notifications for price alerts
-- ✅ Fixed price alert modal state management
-- ✅ Added Firestore security rules for all collections
-- ✅ Enhanced error handling and debug logging
-- ✅ Improved UI/UX with better feedback
+### Version 2.0.0 (January 2025)
+- Implemented real search history tracking with Firestore
+- Added floating toast notifications for price alerts
+- Fixed price alert modal state management
+- Added Firestore security rules for all collections
+- Enhanced error handling and debug logging
+- Improved UI/UX with better user feedback
 
-### **v1.5.0** (December 2024)
-- ✅ Added price alert functionality
-- ✅ Implemented save itinerary feature
-- ✅ Enhanced flight reliability scoring
-- ✅ Added live flight tracking
+### Version 1.5.0 (December 2024)
+- Added price alert functionality
+- Implemented save itinerary feature
+- Enhanced flight reliability scoring
+- Added live flight tracking
 
 ---
 
-## 📝 License
+## License
 
 This project is licensed under the MIT License.
 
 ---
 
-## 👨‍💻 Author
+## Author
 
 **Wong Cheng Yong**
 - GitHub: [@WCYG22](https://github.com/WCYG22)
 - Email: wongchengyong100@gmail.com
 - Student ID: B1LM27
 - Program: METS (UCOMS DS)
+- Institution: University of Wollongong Malaysia KDU
 
 ---
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
-- **Google Gemini AI** - Flight search intelligence
-- **Firebase** - Backend infrastructure
-- **Lucide Icons** - Beautiful icon library
-- **Framer Motion** - Smooth animations
-- **Tailwind CSS** - Styling framework
+- Google Gemini AI for flight search intelligence
+- Firebase for backend infrastructure
+- Lucide Icons for icon library
+- Framer Motion for smooth animations
+- Tailwind CSS for styling framework
 
 ---
 
-## 📞 Support
+## Support
 
 For issues, questions, or contributions:
 - Open an issue on [GitHub](https://github.com/WCYG22/SF_F/issues)
@@ -398,4 +399,4 @@ For issues, questions, or contributions:
 
 ---
 
-**Made with ❤️ and ✈️ by Smart Flight Team**
+**Smart Flight - Intelligent Travel Planning**
