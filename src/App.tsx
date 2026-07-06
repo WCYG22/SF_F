@@ -2269,6 +2269,95 @@ export default function App() {
           </>
         )}
       </AnimatePresence>
+
+      {/* Set Price Alert Modal */}
+      <AnimatePresence>
+        {showPriceAlertModal && selectedItinerary && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => {
+                setShowPriceAlertModal(false);
+                setTargetPrice('');
+              }}
+              className="fixed inset-0 z-[99] bg-black/40 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+            >
+              <div className="bg-background border border-white/10 rounded-2xl shadow-2xl max-w-md w-full p-6">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 bg-accent/20 rounded-lg flex items-center justify-center">
+                    <Bell className="w-5 h-5 text-accent" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-black uppercase tracking-widest">Set Price Alert</h3>
+                    <p className="text-xs text-white/50">Get notified when price drops</p>
+                  </div>
+                </div>
+
+                <div className="space-y-4 mb-6">
+                  <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-sm font-bold text-white/60">Route</span>
+                      <span className="text-sm font-black mono">{selectedItinerary.legs[0].departure.airport} → {selectedItinerary.legs[selectedItinerary.legs.length - 1].arrival.airport}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-bold text-white/60">Current Price</span>
+                      <span className="text-lg font-black mono text-accent">RM{selectedItinerary.price}</span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-bold text-white/60 mb-2">Target Price (RM)</label>
+                    <input
+                      type="number"
+                      value={targetPrice}
+                      onChange={(e) => setTargetPrice(e.target.value)}
+                      placeholder="Enter target price"
+                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:border-accent transition-all"
+                    />
+                    <p className="text-xs text-white/40 mt-2">You'll be notified when the price drops to or below this amount</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => {
+                      setShowPriceAlertModal(false);
+                      setTargetPrice('');
+                    }}
+                    className="flex-1 px-4 py-3 rounded-xl text-sm font-bold uppercase tracking-widest bg-white/5 text-white hover:bg-white/10 border border-white/10 transition-all"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={async () => {
+                      const price = parseFloat(targetPrice);
+                      if (price && price < selectedItinerary.price) {
+                        await handleSetPriceAlert(selectedItinerary, price);
+                        setShowPriceAlertModal(false);
+                        setTargetPrice('');
+                      } else {
+                        setError("Target price must be lower than current price");
+                      }
+                    }}
+                    disabled={!targetPrice || parseFloat(targetPrice) >= selectedItinerary.price}
+                    className="flex-1 px-4 py-3 rounded-xl text-sm font-bold uppercase tracking-widest bg-accent text-white hover:bg-accent/80 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                  >
+                    Set Alert
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
