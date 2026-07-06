@@ -98,6 +98,13 @@ export default function App() {
   const [showPriceAlertModal, setShowPriceAlertModal] = useState(false);
   const [targetPrice, setTargetPrice] = useState<string>('');
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [searchHistoryData, setSearchHistoryData] = useState([
+    { from: 'KUL', to: 'SIN', date: 'Dec 15, 2024', price: 'RM 185', status: 'Booked' },
+    { from: 'KUL', to: 'BKK', date: 'Dec 10, 2024', price: 'RM 420', status: 'Viewed' },
+    { from: 'SIN', to: 'HKG', date: 'Dec 8, 2024', price: 'RM 680', status: 'Saved' },
+    { from: 'KUL', to: 'HAN', date: 'Dec 5, 2024', price: 'RM 320', status: 'Viewed' },
+    { from: 'BKK', to: 'KUL', date: 'Dec 1, 2024', price: 'RM 450', status: 'Viewed' },
+  ]);
 
   // Navigation State
   const [activeTab, setActiveTab] = useState<'search' | 'live' | 'saved' | 'profile'>('search');
@@ -2102,6 +2109,9 @@ export default function App() {
                     {selectedHistoryItems.size > 0 && (
                       <button
                         onClick={() => {
+                          // Remove selected items
+                          const newHistory = searchHistoryData.filter((_, idx) => !selectedHistoryItems.has(idx));
+                          setSearchHistoryData(newHistory);
                           setSelectedHistoryItems(new Set());
                         }}
                         className="px-3 py-1.5 text-xs font-bold uppercase text-red-400 hover:bg-red-500/10 border border-red-500/30 rounded-lg transition-all"
@@ -2120,13 +2130,7 @@ export default function App() {
 
                 {/* Content */}
                 <div className="p-6 space-y-4">
-                  {[
-                    { from: 'KUL', to: 'SIN', date: 'Dec 15, 2024', price: 'RM 185', status: 'Booked' },
-                    { from: 'KUL', to: 'BKK', date: 'Dec 10, 2024', price: 'RM 420', status: 'Viewed' },
-                    { from: 'SIN', to: 'HKG', date: 'Dec 8, 2024', price: 'RM 680', status: 'Saved' },
-                    { from: 'KUL', to: 'HAN', date: 'Dec 5, 2024', price: 'RM 320', status: 'Viewed' },
-                    { from: 'BKK', to: 'KUL', date: 'Dec 1, 2024', price: 'RM 450', status: 'Viewed' },
-                  ].map((item, idx) => (
+                  {searchHistoryData.map((item, idx) => (
                     <div 
                       key={idx} 
                       onClick={() => {
