@@ -2178,12 +2178,18 @@ export default function App() {
                   <div className="flex items-center gap-3">
                     {selectedAlertItems.size > 0 && (
                       <button
-                        onClick={() => {
+                        onClick={async () => {
+                          // Delete all selected alerts
+                          const deletePromises = Array.from(selectedAlertItems).map(idx => {
+                            const alert = priceAlerts[idx];
+                            return handleDeletePriceAlert(alert.id);
+                          });
+                          await Promise.all(deletePromises);
                           setSelectedAlertItems(new Set());
                         }}
                         className="px-3 py-1.5 text-xs font-bold uppercase text-red-400 hover:bg-red-500/10 border border-red-500/30 rounded-lg transition-all"
                       >
-                        Clear Selected ({selectedAlertItems.size})
+                        Delete Selected ({selectedAlertItems.size})
                       </button>
                     )}
                     <button
@@ -2197,72 +2203,78 @@ export default function App() {
 
                 {/* Content */}
                 <div className="p-6 space-y-4">
-                  {[
-                    { from: 'KUL', to: 'SIN', currentPrice: 'RM 285', targetPrice: 'RM 250', savings: 'RM 35', status: 'Active' },
-                    { from: 'KUL', to: 'BKK', currentPrice: 'RM 520', targetPrice: 'RM 450', savings: 'RM 70', status: 'Active' },
-                    { from: 'SIN', to: 'HKG', currentPrice: 'RM 780', targetPrice: 'RM 700', savings: 'RM 80', status: 'Alert Triggered' },
-                    { from: 'HAN', to: 'KUL', currentPrice: 'RM 380', targetPrice: 'RM 320', savings: 'RM 60', status: 'Active' },
-                  ].map((item, idx) => (
-                    <div 
-                      key={idx} 
-                      onClick={() => {
-                        const newSelected = new Set(selectedAlertItems);
-                        if (newSelected.has(idx)) {
-                          newSelected.delete(idx);
-                        } else {
-                          newSelected.add(idx);
-                        }
-                        setSelectedAlertItems(newSelected);
-                      }}
-                      className={`p-4 border rounded-xl transition-all cursor-pointer group ${
-                        selectedAlertItems.has(idx)
-                          ? 'bg-blue-500/20 border-blue-500/50'
-                          : 'bg-white/5 hover:bg-white/10 border-white/10'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3 flex-1">
-                          <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
-                            selectedAlertItems.has(idx)
-                              ? 'bg-blue-500 border-blue-500'
-                              : 'border-white/30 hover:border-blue-500'
-                          }`}>
-                            {selectedAlertItems.has(idx) && (
-                              <Check className="w-3 h-3 text-background" />
-                            )}
-                          </div>
-                          <div className="text-center">
-                            <div className="text-sm font-black mono text-white">{item.from}</div>
-                            <div className="text-[10px] text-white/50">From</div>
-                          </div>
-                          <ArrowRight className="w-4 h-4 text-white/40" />
-                          <div className="text-center">
-                            <div className="text-sm font-black mono text-white">{item.to}</div>
-                            <div className="text-[10px] text-white/50">To</div>
-                          </div>
-                          <div className="ml-4 border-l border-white/20 pl-4 space-y-1">
-                            <div className="flex items-center gap-2">
-                              <span className="text-[10px] text-white/50">Current:</span>
-                              <span className="text-sm font-black mono text-white">{item.currentPrice}</span>
+                  {priceAlerts.length === 0 ? (
+                    <div className="text-center py-12">
+                      <Bell className="w-16 h-16 text-white/20 mx-auto mb-4" />
+                      <p className="text-white/60">No price alerts set yet</p>
+                      <p className="text-white/40 text-sm mt-2">Set an alert on any flight to get notified when prices drop</p>
+                    </div>
+                  ) : (
+                    priceAlerts.map((alert, idx) => (
+                      <div 
+                        key={alert.id} 
+                        className={`p-4 border rounded-xl transition-all group ${
+                          selectedAlertItems.has(idx)
+                            ? 'bg-blue-500/20 border-blue-500/50'
+                            : 'bg-white/5 hover:bg-white/10 border-white/10'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3 flex-1">
+                            <div 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const newSelected = new Set(selectedAlertItems);
+                                if (newSelected.has(idx)) {
+                                  newSelected.delete(idx);
+                                } else {
+                                  newSelected.add(idx);
+                                }
+                                setSelectedAlertItems(newSelected);
+                              }}
+                              className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all cursor-pointer ${
+                                selectedAlertItems.has(idx)
+                                  ? 'bg-blue-500 border-blue-500'
+                                  : 'border-white/30 hover:border-blue-500'
+                              }`}
+                            >
+                              {selectedAlertItems.has(idx) && (
+                                <Check className="w-3 h-3 text-background" />
+                              )}
                             </div>
-                            <div className="flex items-center gap-2">
-                              <span className="text-[10px] text-white/50">Target:</span>
-                              <span className="text-sm font-black mono text-blue-400">{item.targetPrice}</span>
+                            <div className="text-center">
+                              <div className="text-sm font-black mono text-white">{alert.origin}</div>
+                              <div className="text-[10px] text-white/50">From</div>
+                            </div>
+                            <ArrowRight className="w-4 h-4 text-white/40" />
+                            <div className="text-center">
+                              <div className="text-sm font-black mono text-white">{alert.destination}</div>
+                              <div className="text-[10px] text-white/50">To</div>
+                            </div>
+                            <div className="ml-4 border-l border-white/20 pl-4 space-y-1">
+                              <div className="flex items-center gap-2">
+                                <span className="text-[10px] text-white/50">Current:</span>
+                                <span className="text-sm font-black mono text-white">RM{alert.currentPrice}</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-[10px] text-white/50">Target:</span>
+                                <span className="text-sm font-black mono text-blue-400">RM{alert.targetPrice}</span>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                        <div className="text-right space-y-2">
-                          <div className="text-right">
-                            <div className="text-[10px] text-green-400 font-bold mb-1">Potential Savings</div>
-                            <div className="text-lg font-black mono text-green-400">{item.savings}</div>
+                          <div className="text-right space-y-2">
+                            <div className="text-right">
+                              <div className="text-[10px] text-green-400 font-bold mb-1">Potential Savings</div>
+                              <div className="text-lg font-black mono text-green-400">RM{(alert.currentPrice - alert.targetPrice).toFixed(0)}</div>
+                            </div>
+                            <Badge variant={alert.status === 'triggered' ? 'error' : 'success'} className="text-[10px]">
+                              {alert.status === 'triggered' ? 'Alert Triggered' : 'Active'}
+                            </Badge>
                           </div>
-                          <Badge variant={item.status === 'Alert Triggered' ? 'error' : 'success'} className="text-[10px]">
-                            {item.status}
-                          </Badge>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    ))
+                  )}
                 </div>
               </div>
             </motion.div>
