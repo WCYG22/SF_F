@@ -93,5 +93,20 @@ service cloud.firestore {
       allow update: if isAuthenticated() && (resource.data.uid == request.auth.uid && isValidItinerary(request.resource.data)) || isAdmin();
       allow delete: if isAuthenticated() && (resource.data.uid == request.auth.uid || isAdmin());
     }
+
+    match /price_alerts/{alertId} {
+      allow read: if isAuthenticated() && (resource.data.uid == request.auth.uid || isAdmin());
+      allow create: if isAuthenticated() && 
+                        request.resource.data.uid == request.auth.uid &&
+                        request.resource.data.keys().hasOnly(['uid', 'itineraryId', 'origin', 'destination', 'currentPrice', 'targetPrice', 'reliabilityScore', 'status', 'createdAt']) &&
+                        request.resource.data.origin is string &&
+                        request.resource.data.destination is string &&
+                        request.resource.data.currentPrice is number &&
+                        request.resource.data.targetPrice is number &&
+                        request.resource.data.targetPrice < request.resource.data.currentPrice &&
+                        request.resource.data.status in ['active', 'inactive', 'triggered'];
+      allow update: if isAuthenticated() && (resource.data.uid == request.auth.uid || isAdmin());
+      allow delete: if isAuthenticated() && (resource.data.uid == request.auth.uid || isAdmin());
+    }
   }
 }
