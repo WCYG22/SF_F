@@ -575,6 +575,10 @@ export default function App() {
   };
 
   const handleSetPriceAlert = async (itinerary: Itinerary, targetPrice: number) => {
+    console.log('handleSetPriceAlert called');
+    console.log('User:', user);
+    console.log('User email verified:', user?.emailVerified);
+    
     if (!user) {
       setActiveTab('profile');
       setError("User login and authentication are required to set price alerts.");
@@ -590,6 +594,8 @@ export default function App() {
     const docId = `${user.uid}_${itinerary.id}_${Date.now()}`;
     const path = `price_alerts/${docId}`;
     
+    console.log('Attempting to save to Firestore:', path);
+    
     try {
       await setDoc(doc(db, 'price_alerts', docId), {
         uid: user.uid,
@@ -602,10 +608,12 @@ export default function App() {
         status: 'active',
         createdAt: serverTimestamp(),
       });
+      console.log('Alert saved successfully!');
       setError(null);
       setSuccessMessage(`Price alert set! You'll be notified when price drops to or below RM${targetPrice}`);
       setTimeout(() => setSuccessMessage(null), 5000);
     } catch (error) {
+      console.error('Error saving alert:', error);
       handleFirestoreError(error, OperationType.CREATE, path);
     }
   };
@@ -2361,12 +2369,18 @@ export default function App() {
                   </button>
                   <button
                     onClick={async () => {
+                      console.log('SET ALERT clicked');
+                      console.log('Target Price:', targetPrice);
+                      console.log('Current Price:', selectedItinerary.price);
                       const price = parseFloat(targetPrice);
+                      console.log('Parsed Price:', price);
                       if (price && price < selectedItinerary.price) {
+                        console.log('Validation passed, calling handleSetPriceAlert');
                         await handleSetPriceAlert(selectedItinerary, price);
                         setShowPriceAlertModal(false);
                         setTargetPrice('');
                       } else {
+                        console.log('Validation failed');
                         setError("Target price must be lower than current price");
                       }
                     }}
