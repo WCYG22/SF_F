@@ -182,6 +182,35 @@ export default function App() {
     return () => unsubscribe();
   }, [user]);
 
+  useEffect(() => {
+    if (!user) {
+      setSearchHistoryData([]);
+      return;
+    }
+
+    const q = query(
+      collection(db, 'search_history'), 
+      where('uid', '==', user.uid),
+      orderBy('createdAt', 'desc')
+    );
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const history = snapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          from: data.origin,
+          to: data.destination,
+          date: data.searchDate,
+          price: data.resultCount ? `${data.resultCount} results` : 'N/A',
+          status: data.status || 'Viewed'
+        };
+      });
+      setSearchHistoryData(history);
+    });
+
+    return () => unsubscribe();
+  }, [user]);
+
   const handleSearch = async (e?: React.FormEvent) => {
     if (e) {
       e.preventDefault();
@@ -221,10 +250,23 @@ export default function App() {
         }
         setItineraries(allResults);
         setReturnItineraries([]);
+        
+        // Save search history for first leg
+        if (multiCityLegs.length > 0 && allResults.length > 0) {
+          await handleSaveSearchHistory(
+            multiCityLegs[0].origin, 
+            multiCityLegs[multiCityLegs.length - 1].destination, 
+            multiCityLegs[0].date,
+            allResults.length
+          );
+        }
       } else {
         // Search outbound flight
         const outboundResults = await searchFlight(`${origin} to ${destination} on ${date}`, isDemoMode, date);
         setItineraries(outboundResults);
+
+        // Save search history
+        await handleSaveSearchHistory(origin, destination, date, outboundResults.length);
 
         // If return trip, also search return flight
         if (tripType === 'return') {
@@ -629,6 +671,38 @@ export default function App() {
     const path = `price_alerts/${alertId}`;
     try {
       await deleteDoc(doc(db, 'price_alerts', alertId));
+    } catch (error) {
+      handleFirestoreError(error, OperationType.DELETE, path);
+    }
+  };
+
+  const handleSaveSearchHistory = async (origin: string, destination: string, searchDate: string, resultCount: number) => {
+    if (!user) return;
+
+    const docId = `${user.uid}_${Date.now()}`;
+    const path = `search_history/${docId}`;
+    
+    try {
+      await setDoc(doc(db, 'search_history', docId), {
+        uid: user.uid,
+        origin: origin,
+        destination: destination,
+        searchDate: searchDate,
+        resultCount: resultCount,
+        status: 'Viewed',
+        createdAt: serverTimestamp(),
+      });
+      console.log('Search history saved');
+    } catch (error) {
+      console.error('Error saving search history:', error);
+      handleFirestoreError(error, OperationType.CREATE, path);
+    }
+  };
+
+  const handleDeleteSearchHistory = async (historyId: string) => {
+    const path = `search_history/${historyId}`;
+    try {
+      await deleteDoc(doc(db, 'search_history', historyId));
     } catch (error) {
       handleFirestoreError(error, OperationType.DELETE, path);
     }
@@ -2108,10 +2182,14 @@ export default function App() {
                   <div className="flex items-center gap-3">
                     {selectedHistoryItems.size > 0 && (
                       <button
-                        onClick={() => {
-                          // Remove selected items
-                          const newHistory = searchHistoryData.filter((_, idx) => !selectedHistoryItems.has(idx));
-                          setSearchHistoryData(newHistory);
+                        onClick={async () => {
+                          // Delete selected items from Firestore
+                          const itemsToDelete = searchHistoryData.filter((_, idx) => selectedHistoryItems.has(idx));
+                          for (const item of itemsToDelete) {
+                            if (item.id) {
+                              await handleDeleteSearchHistory(item.id);
+                            }
+                          }
                           setSelectedHistoryItems(new Set());
                         }}
                         className="px-3 py-1.5 text-xs font-bold uppercase text-red-400 hover:bg-red-500/10 border border-red-500/30 rounded-lg transition-all"
