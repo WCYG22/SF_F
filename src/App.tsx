@@ -2428,6 +2428,12 @@ export default function App() {
                             }
                           }
                           setSelectedHistoryItems(new Set());
+                          
+                          // Auto-close if all items were deleted
+                          const remainingCount = searchHistoryData.length - itemsToDelete.length;
+                          if (remainingCount === 0) {
+                            setShowSearchHistory(false);
+                          }
                         }}
                         className="px-3 py-1.5 text-xs font-bold uppercase text-red-400 hover:bg-red-500/10 border border-red-500/30 rounded-lg transition-all"
                       >
@@ -2541,6 +2547,12 @@ export default function App() {
                           });
                           await Promise.all(deletePromises);
                           setSelectedAlertItems(new Set());
+                          
+                          // Auto-close if all alerts were deleted
+                          const remainingCount = priceAlerts.length - deletePromises.length;
+                          if (remainingCount === 0) {
+                            setShowPriceAlerts(false);
+                          }
                         }}
                         className="px-3 py-1.5 text-xs font-bold uppercase text-red-400 hover:bg-red-500/10 border border-red-500/30 rounded-lg transition-all"
                       >
