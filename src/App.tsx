@@ -1955,19 +1955,42 @@ export default function App() {
               exit={{ opacity: 0, y: -20 }}
               className="space-y-8"
             >
-              <div className="flex flex-col gap-2 px-2">
-                <div className="flex items-center justify-between">
+              {/* Enhanced Header with Gradient Background */}
+              <motion.div 
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex flex-col gap-2 px-2 relative"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-red-500/5 via-pink-500/5 to-red-500/5 rounded-2xl blur-xl" />
+                <div className="relative flex items-center justify-between">
                   <h2 className="text-3xl font-black tracking-tight flex items-center gap-4">
-                    <Heart className="w-8 h-8 text-red-500 fill-current" />
+                    <motion.div
+                      animate={{ scale: [1, 1.1, 1] }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                    >
+                      <Heart className="w-8 h-8 text-red-500 fill-current drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]" />
+                    </motion.div>
                     Saved Trips
                   </h2>
-                  <span className="text-sm mono text-white/60 font-bold">{savedItineraries.length} SAVED</span>
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+                    className="bg-red-500/10 border border-red-500/20 px-4 py-2 rounded-full"
+                  >
+                    <span className="text-sm mono text-red-400 font-black">{savedItineraries.length} SAVED</span>
+                  </motion.div>
                 </div>
-                <p className="text-xs text-white/70">Manage and track your favorite flight itineraries and price alerts.</p>
-              </div>
+                <p className="relative text-xs text-white/70">Manage and track your favorite flight itineraries and price alerts.</p>
+              </motion.div>
 
               {user && savedItineraries.length > 0 && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 px-2">
+                <motion.div 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 }}
+                  className="grid grid-cols-1 md:grid-cols-2 gap-3 px-2"
+                >
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted" />
                     <input 
@@ -1975,13 +1998,13 @@ export default function App() {
                       placeholder="Search saved trips..."
                       value={savedSearchQuery}
                       onChange={(e) => setSavedSearchQuery(e.target.value)}
-                      className="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-4 py-3 text-sm focus:border-accent outline-none transition-all"
+                      className="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-4 py-3 text-sm focus:border-accent outline-none transition-all hover:bg-white/[0.07] focus:bg-white/[0.08]"
                     />
                   </div>
                   <select 
                     value={savedFilterAirline}
                     onChange={(e) => setSavedFilterAirline(e.target.value)}
-                    className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-accent outline-none transition-all"
+                    className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-accent outline-none transition-all hover:bg-white/[0.07] focus:bg-white/[0.08]"
                     style={{
                       colorScheme: 'dark',
                       backgroundColor: '#0f172a',
@@ -1992,7 +2015,65 @@ export default function App() {
                       <option key={airline} value={airline}>{airline}</option>
                     ))}
                   </select>
-                </div>
+                </motion.div>
+              )}
+
+              {/* Active Filter Chips */}
+              {user && (savedSearchQuery || savedFilterAirline) && (
+                <motion.div 
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="flex flex-wrap gap-2 px-2"
+                >
+                  {savedSearchQuery && (
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      exit={{ scale: 0 }}
+                      className="flex items-center gap-2 bg-blue-500/10 text-blue-400 border border-blue-500/20 px-3 py-1.5 rounded-full text-xs font-bold"
+                    >
+                      <Search className="w-3 h-3" />
+                      Search: "{savedSearchQuery}"
+                      <button
+                        onClick={() => setSavedSearchQuery('')}
+                        className="hover:bg-blue-500/20 rounded-full p-0.5 transition-colors"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </motion.div>
+                  )}
+                  {savedFilterAirline && (
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      exit={{ scale: 0 }}
+                      className="flex items-center gap-2 bg-purple-500/10 text-purple-400 border border-purple-500/20 px-3 py-1.5 rounded-full text-xs font-bold"
+                    >
+                      <Plane className="w-3 h-3" />
+                      {savedFilterAirline}
+                      <button
+                        onClick={() => setSavedFilterAirline('')}
+                        className="hover:bg-purple-500/20 rounded-full p-0.5 transition-colors"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </motion.div>
+                  )}
+                  {(savedSearchQuery || savedFilterAirline) && (
+                    <motion.button
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      exit={{ scale: 0 }}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => { setSavedSearchQuery(''); setSavedFilterAirline(''); }}
+                      className="flex items-center gap-1 bg-white/5 text-white/60 border border-white/10 px-3 py-1.5 rounded-full text-xs font-bold hover:bg-white/10 hover:text-white transition-all"
+                    >
+                      Clear All
+                    </motion.button>
+                  )}
+                </motion.div>
               )}
 
               {!user ? (
@@ -2021,16 +2102,28 @@ export default function App() {
                   </button>
                 </div>
               ) : savedItineraries.length === 0 ? (
-                <div className="text-center py-20 bg-white/5 rounded-3xl border border-dashed border-white/10">
-                  <Heart className="w-12 h-12 text-white/10 mx-auto mb-4" />
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.2 }}
+                  className="text-center py-20 bg-white/5 rounded-3xl border border-dashed border-white/10"
+                >
+                  <motion.div
+                    animate={{ scale: [1, 1.1, 1], rotate: [0, 5, -5, 0] }}
+                    transition={{ duration: 3, repeat: Infinity }}
+                  >
+                    <Heart className="w-12 h-12 text-white/10 mx-auto mb-4" />
+                  </motion.div>
                   <p className="text-white/60">You haven't saved any itineraries yet.</p>
-                  <button 
+                  <motion.button 
                     onClick={() => setActiveTab('search')}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                     className="mt-6 text-accent font-bold uppercase tracking-widest text-xs hover:underline"
                   >
                     Start Searching
-                  </button>
-                </div>
+                  </motion.button>
+                </motion.div>
               ) : (
                 <div className="space-y-4">
                   {(() => {
@@ -2060,8 +2153,13 @@ export default function App() {
                       );
                     }
 
-                    return filteredSaved.map((saved) => (
-                      <div key={saved.id}>
+                    return filteredSaved.map((saved, index) => (
+                      <motion.div 
+                        key={saved.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.1 }}
+                      >
                         <ItineraryCard 
                           itinerary={{
                             id: saved.itineraryId,
@@ -2085,7 +2183,7 @@ export default function App() {
                             totalDuration: '',
                           })} 
                         />
-                      </div>
+                      </motion.div>
                     ));
                   })()}
                 </div>
@@ -2904,34 +3002,43 @@ const ItineraryCard: React.FC<{
 
   return (
     <motion.div
-      whileHover={{ scale: 1.01 }}
-      whileTap={{ scale: 0.99 }}
+      whileHover={{ scale: 1.02, y: -4 }}
+      whileTap={{ scale: 0.98 }}
       onClick={onClick}
       className="cursor-pointer"
     >
-      <Card className="hover:bg-white/[0.07] hover:border-accent/40 transition-all group border border-white/10 relative overflow-hidden p-6">
+      <Card className="hover:bg-white/[0.07] hover:border-accent/40 transition-all duration-300 group border border-white/10 relative overflow-hidden p-6 hover:shadow-[0_8px_30px_rgb(0,0,0,0.3)]">
         {/* Real-time Status Simulation */}
-        <div className="absolute top-0 right-0 px-4 py-2 bg-accent/10 border-b border-l border-accent/20 rounded-bl-lg flex items-center gap-2">
-          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+        <motion.div 
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.2 }}
+          className="absolute top-0 right-0 px-4 py-2 bg-accent/10 border-b border-l border-accent/20 rounded-bl-lg flex items-center gap-2"
+        >
+          <motion.div 
+            animate={{ scale: [1, 1.3, 1] }}
+            transition={{ duration: 2, repeat: Infinity }}
+            className="w-2 h-2 bg-green-500 rounded-full shadow-[0_0_8px_rgba(34,197,94,0.8)]"
+          />
           <span className="text-[9px] font-black text-accent uppercase tracking-widest">Live: On Time</span>
-        </div>
+        </motion.div>
 
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-6">
             <div className={cn(
-              "relative flex items-center justify-center transition-all group-hover:scale-105",
+              "relative flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:rotate-3",
               "w-20 h-20"
             )}>
               {/* Score Card */}
               <div className={cn(
-                "relative rounded-lg flex flex-col items-center justify-center w-full h-full border-2",
+                "relative rounded-lg flex flex-col items-center justify-center w-full h-full border-2 transition-all duration-300",
                 itinerary.reliabilityScore >= 9.5 
-                  ? "bg-green-950/40 border-green-700/50" 
+                  ? "bg-green-950/40 border-green-700/50 group-hover:shadow-[0_0_20px_rgba(34,197,94,0.4)]" 
                   : itinerary.reliabilityScore >= 8.5 
-                  ? "bg-blue-950/40 border-blue-700/50"
+                  ? "bg-blue-950/40 border-blue-700/50 group-hover:shadow-[0_0_20px_rgba(59,130,246,0.4)]"
                   : itinerary.reliabilityScore >= 7
-                  ? "bg-amber-950/40 border-amber-700/50"
-                  : "bg-orange-950/40 border-orange-700/50"
+                  ? "bg-amber-950/40 border-amber-700/50 group-hover:shadow-[0_0_20px_rgba(245,158,11,0.4)]"
+                  : "bg-orange-950/40 border-orange-700/50 group-hover:shadow-[0_0_20px_rgba(249,115,22,0.4)]"
               )}>
                 <motion.div 
                   animate={{ scale: [1, 1.02, 1] }}
@@ -2995,10 +3102,13 @@ const ItineraryCard: React.FC<{
             </div>
           </div>
           <div className="text-right flex flex-col items-end gap-3">
-            <div>
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              transition={{ type: "spring", stiffness: 300 }}
+            >
               <div className="text-xs text-white/60 mono mb-1 font-bold">EST. PRICE</div>
-              <div className="text-2xl font-black mono text-accent">RM{itinerary.price}</div>
-            </div>
+              <div className="text-3xl font-black mono text-accent drop-shadow-[0_0_10px_rgba(var(--accent-rgb),0.3)]">RM{itinerary.price}</div>
+            </motion.div>
             {onSave && (
               <button
                 onClick={onSave}
@@ -3029,13 +3139,15 @@ const ItineraryCard: React.FC<{
               </div>
             </div>
             {onRemove && (
-              <button
+              <motion.button
                 onClick={onRemove}
+                whileHover={{ scale: 1.05, x: -2 }}
+                whileTap={{ scale: 0.95 }}
                 className="flex items-center gap-2 px-4 py-2 bg-red-500/10 text-red-500 rounded-lg transition-all hover:bg-red-500 hover:text-white border border-red-500/20 text-xs font-black uppercase tracking-widest"
               >
                 <Trash2 className="w-4 h-4" />
                 Remove Trip
-              </button>
+              </motion.button>
             )}
           </div>
         </div>
