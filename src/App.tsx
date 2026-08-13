@@ -69,13 +69,17 @@ export default function App() {
   
   const [origin, setOrigin] = useState('');
   const [destination, setDestination] = useState('');
-  const [date, setDate] = useState(format(new Date(), 'yyyy-MM-dd'));
-  const [returnDate, setReturnDate] = useState(format(addMonths(new Date(), 1), 'yyyy-MM-dd'));
+  const [date, setDate] = useState('');
+  const [returnDate, setReturnDate] = useState('');
+  
+  // Track if user has manually selected dates
+  const [hasSelectedDate, setHasSelectedDate] = useState(false);
+  const [hasSelectedReturnDate, setHasSelectedReturnDate] = useState(false);
   
   // Multi-city state
   const [multiCityLegs, setMultiCityLegs] = useState<Array<{id: string; origin: string; destination: string; date: string}>>([
-    { id: '1', origin: '', destination: '', date: format(new Date(), 'yyyy-MM-dd') },
-    { id: '2', origin: '', destination: '', date: format(addDays(new Date(), 1), 'yyyy-MM-dd') }
+    { id: '1', origin: '', destination: '', date: '' },
+    { id: '2', origin: '', destination: '', date: '' }
   ]);
   const [itineraries, setItineraries] = useState<Itinerary[]>([]);
   const [returnItineraries, setReturnItineraries] = useState<Itinerary[]>([]);
@@ -236,10 +240,12 @@ export default function App() {
         multiCityLegs.every(leg => leg.origin && leg.destination && leg.date);
     } else if (tripType === 'return') {
       // Check if origin, destination, date, and return date are all filled
-      shouldShowModal = origin && destination && date && returnDate;
+      // AND user has actually selected both dates
+      shouldShowModal = origin && destination && date && returnDate && hasSelectedDate && hasSelectedReturnDate;
     } else {
       // One-way: check if origin, destination, and date are all filled
-      shouldShowModal = origin && destination && date;
+      // AND user has actually selected the date
+      shouldShowModal = origin && destination && date && hasSelectedDate;
     }
     
     if (shouldShowModal) {
@@ -249,7 +255,7 @@ export default function App() {
       }, 300);
       return () => clearTimeout(timer);
     }
-  }, [origin, destination, date, returnDate, multiCityLegs, tripType, loading, showSearchConfirmModal, pendingSearchData]);
+  }, [origin, destination, date, returnDate, multiCityLegs, tripType, loading, showSearchConfirmModal, pendingSearchData, hasSelectedDate, hasSelectedReturnDate]);
 
   const handleShowSearchConfirmation = () => {
     // Validate before showing confirmation
@@ -1243,6 +1249,8 @@ export default function App() {
                           setItineraries([]);
                           setReturnItineraries([]);
                           setIsSearching(false);
+                          setHasSelectedDate(false);
+                          setHasSelectedReturnDate(false);
                         }}
                         className="w-full px-6 py-4 text-left hover:bg-slate-100 transition-colors flex items-center gap-4 text-slate-800"
                       >
@@ -1259,6 +1267,8 @@ export default function App() {
                           setItineraries([]);
                           setReturnItineraries([]);
                           setIsSearching(false);
+                          setHasSelectedDate(false);
+                          setHasSelectedReturnDate(false);
                         }}
                         className="w-full px-6 py-4 text-left hover:bg-slate-100 transition-colors flex items-center gap-4 text-slate-800 border-t border-slate-200"
                       >
@@ -1275,6 +1285,8 @@ export default function App() {
                           setItineraries([]);
                           setReturnItineraries([]);
                           setIsSearching(false);
+                          setHasSelectedDate(false);
+                          setHasSelectedReturnDate(false);
                         }}
                         className="w-full px-6 py-4 text-left hover:bg-slate-100 transition-colors flex items-center gap-4 text-slate-800 border-t border-slate-200"
                       >
@@ -1322,7 +1334,10 @@ export default function App() {
                           <CalendarSelector 
                             label="Depart"
                             value={date}
-                            onChange={setDate}
+                            onChange={(newDate) => {
+                              setDate(newDate);
+                              setHasSelectedDate(true);
+                            }}
                             originCode={origin}
                             destCode={destination}
                             searchResults={itineraries}
@@ -1333,7 +1348,10 @@ export default function App() {
                             <CalendarSelector 
                               label="Return"
                               value={returnDate}
-                              onChange={setReturnDate}
+                              onChange={(newDate) => {
+                                setReturnDate(newDate);
+                                setHasSelectedReturnDate(true);
+                              }}
                               originCode={destination}
                               destCode={origin}
                               searchResults={itineraries}
@@ -1408,7 +1426,7 @@ export default function App() {
                                 id: Date.now().toString(),
                                 origin: lastLeg.destination,
                                 destination: '',
-                                date: format(addDays(parseISO(lastLeg.date), 1), 'yyyy-MM-dd')
+                                date: lastLeg.date ? format(addDays(parseISO(lastLeg.date), 1), 'yyyy-MM-dd') : ''
                               }
                             ]);
                           }}
