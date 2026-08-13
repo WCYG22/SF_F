@@ -229,8 +229,8 @@ export default function App() {
 
   // Auto-show confirmation modal when all required fields are filled
   useEffect(() => {
-    // Don't trigger if already loading, already showing modal, or if there's pending data
-    if (loading || showSearchConfirmModal || pendingSearchData) return;
+    // Don't trigger if already loading, already showing modal, if there's pending data, or if search results exist
+    if (loading || showSearchConfirmModal || pendingSearchData || isSearching || itineraries.length > 0) return;
     
     let shouldShowModal = false;
     
@@ -255,7 +255,7 @@ export default function App() {
       }, 300);
       return () => clearTimeout(timer);
     }
-  }, [origin, destination, date, returnDate, multiCityLegs, tripType, loading, showSearchConfirmModal, pendingSearchData, hasSelectedDate, hasSelectedReturnDate]);
+  }, [origin, destination, date, returnDate, multiCityLegs, tripType, loading, showSearchConfirmModal, pendingSearchData, hasSelectedDate, hasSelectedReturnDate, isSearching, itineraries.length]);
 
   const handleShowSearchConfirmation = () => {
     // Validate before showing confirmation
@@ -344,6 +344,9 @@ export default function App() {
     } finally {
       setLoading(false);
       setPendingSearchData(null);
+      // Reset flags to prevent modal from re-appearing
+      setHasSelectedDate(false);
+      setHasSelectedReturnDate(false);
     }
   };
 
@@ -904,6 +907,9 @@ export default function App() {
               onClick={() => {
                 setShowSearchConfirmModal(false);
                 setPendingSearchData(null);
+                // Reset flags to prevent modal from re-appearing
+                setHasSelectedDate(false);
+                setHasSelectedReturnDate(false);
               }}
             />
             
@@ -1035,6 +1041,9 @@ export default function App() {
                       onClick={() => {
                         setShowSearchConfirmModal(false);
                         setPendingSearchData(null);
+                        // Reset flags to prevent modal from re-appearing
+                        setHasSelectedDate(false);
+                        setHasSelectedReturnDate(false);
                       }}
                       className="flex-1 px-6 py-3 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-xl font-bold uppercase tracking-widest transition-all"
                     >
