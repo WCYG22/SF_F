@@ -1619,6 +1619,133 @@ export default function App() {
                 )}
               </header>
 
+              {/* Results Summary Header - Enhancement #1 */}
+              {isSearching && itineraries.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-6 p-4 bg-gradient-to-r from-accent/10 to-blue-500/10 border border-accent/20 rounded-2xl"
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-accent/20 rounded-xl flex items-center justify-center">
+                        <Plane className="w-5 h-5 text-accent" />
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-black uppercase tracking-widest text-white">
+                          {tripType === 'multicity' 
+                            ? `${multiCityLegs.length} Leg Journey`
+                            : `${origin} → ${destination}`
+                          }
+                        </h3>
+                        <p className="text-xs text-white/60">
+                          {format(parseISO(date), 'EEE, dd MMM yyyy')}
+                          {tripType === 'return' && returnDate && ` • Return: ${format(parseISO(returnDate), 'dd MMM')}`}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-6">
+                      <div className="text-center">
+                        <div className="text-2xl font-black text-accent">{sortedItineraries.length}</div>
+                        <div className="text-[10px] text-white/60 uppercase tracking-wider">Flights Found</div>
+                      </div>
+                      {sortedItineraries.length > 0 && (
+                        <>
+                          <div className="text-center">
+                            <div className="text-lg font-black text-white">
+                              RM{Math.min(...sortedItineraries.map(i => i.price))} - {Math.max(...sortedItineraries.map(i => i.price))}
+                            </div>
+                            <div className="text-[10px] text-white/60 uppercase tracking-wider">Price Range</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-2xl font-black text-green-400">
+                              {(sortedItineraries.reduce((sum, i) => sum + i.reliabilityScore, 0) / sortedItineraries.length).toFixed(1)}
+                            </div>
+                            <div className="text-[10px] text-white/60 uppercase tracking-wider">Avg Reliability</div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Active Filter Chips - Enhancement #2 */}
+              {(filterAirline || filterStops !== null || filterTimeOfDay) && itineraries.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-4 flex flex-wrap items-center gap-2"
+                >
+                  <span className="text-xs text-white/60 font-bold uppercase tracking-widest">Active Filters:</span>
+                  
+                  {filterAirline && (
+                    <motion.div
+                      initial={{ scale: 0.8, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      className="flex items-center gap-2 px-3 py-1.5 bg-accent/20 border border-accent/30 rounded-full text-xs font-bold text-accent"
+                    >
+                      <span>{filterAirline}</span>
+                      <button
+                        onClick={() => setFilterAirline('')}
+                        className="hover:bg-accent/30 rounded-full p-0.5 transition-colors"
+                      >
+                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </motion.div>
+                  )}
+                  
+                  {filterStops !== null && (
+                    <motion.div
+                      initial={{ scale: 0.8, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      className="flex items-center gap-2 px-3 py-1.5 bg-blue-500/20 border border-blue-500/30 rounded-full text-xs font-bold text-blue-400"
+                    >
+                      <span>{filterStops === 0 ? 'Non-stop' : filterStops === 1 ? '1 Stop' : '2+ Stops'}</span>
+                      <button
+                        onClick={() => setFilterStops(null)}
+                        className="hover:bg-blue-500/30 rounded-full p-0.5 transition-colors"
+                      >
+                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </motion.div>
+                  )}
+                  
+                  {filterTimeOfDay && (
+                    <motion.div
+                      initial={{ scale: 0.8, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      className="flex items-center gap-2 px-3 py-1.5 bg-purple-500/20 border border-purple-500/30 rounded-full text-xs font-bold text-purple-400"
+                    >
+                      <span className="capitalize">{filterTimeOfDay}</span>
+                      <button
+                        onClick={() => setFilterTimeOfDay(null)}
+                        className="hover:bg-purple-500/30 rounded-full p-0.5 transition-colors"
+                      >
+                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </motion.div>
+                  )}
+                  
+                  <button
+                    onClick={() => {
+                      setFilterAirline('');
+                      setFilterStops(null);
+                      setFilterTimeOfDay(null);
+                    }}
+                    className="text-xs text-red-400 hover:text-red-300 font-bold uppercase tracking-widest underline transition-colors"
+                  >
+                    Clear All
+                  </button>
+                </motion.div>
+              )}
+
               <div className="space-y-4">
                 {tripType === 'return' && !loading && sortedItineraries.length > 0 ? (
                   <>
