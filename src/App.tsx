@@ -3106,22 +3106,34 @@ function ItineraryDetailView({
           Back to Results
         </button>
         <div className="flex items-center gap-2">
-          <button 
+          <motion.button 
             onClick={onShare}
+            whileHover={{ scale: 1.05, y: -2 }}
+            whileTap={{ scale: 0.95 }}
             className="flex items-center gap-2 bg-white/5 text-white px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-white/10 hover:border-accent/50 transition-all border border-white/10"
           >
             <Mail className="w-4 h-4" />
             Share
-          </button>
-          <button 
+          </motion.button>
+          <motion.button 
             onClick={onSetPriceAlert}
+            whileHover={{ scale: 1.05, y: -2 }}
+            whileTap={{ scale: 0.95 }}
             className="flex items-center gap-2 bg-white/5 text-white px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-white/10 hover:border-accent/50 transition-all border border-white/10"
           >
-            <Bell className="w-4 h-4" />
+            <motion.div
+              animate={{ rotate: [0, -10, 10, -10, 0] }}
+              transition={{ duration: 0.5, repeat: 0 }}
+              whileHover={{ rotate: [0, -10, 10, -10, 0] }}
+            >
+              <Bell className="w-4 h-4" />
+            </motion.div>
             Set Alert
-          </button>
-          <button 
+          </motion.button>
+          <motion.button 
             onClick={onSave}
+            whileHover={{ scale: 1.05, y: -2 }}
+            whileTap={{ scale: 0.95 }}
             className={cn(
               "flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-widest transition-all shadow-lg border",
               isSaved 
@@ -3129,59 +3141,116 @@ function ItineraryDetailView({
                 : "bg-accent text-white shadow-accent/20 hover:bg-accent/80 border-accent hover:border-white/20"
             )}
           >
-            {isSaved ? <Heart className="w-4 h-4 fill-current" /> : <Save className="w-4 h-4" />}
+            <motion.div
+              animate={isSaved ? { scale: [1, 1.2, 1] } : {}}
+              transition={{ duration: 0.3 }}
+            >
+              {isSaved ? <Heart className="w-4 h-4 fill-current" /> : <Save className="w-4 h-4" />}
+            </motion.div>
             {isSaved ? 'Saved' : 'Save Itinerary'}
-          </button>
+          </motion.button>
         </div>
       </div>
 
       {/* Summary Card */}
-      <Card className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        <div className="text-center">
-          <p className="text-[10px] text-white/60 uppercase font-bold tracking-widest mb-1">Total Price</p>
-          <p className="text-2xl font-black mono text-accent">RM{itinerary.price}</p>
-        </div>
-        <div className="text-center border-l border-white/10">
-          <p className="text-[10px] text-white/60 uppercase font-bold tracking-widest mb-1">Duration</p>
-          <p className="text-2xl font-black mono text-white">{itinerary.totalDuration || 'N/A'}</p>
-        </div>
-        <div className="text-center border-l border-white/10">
-          <p className="text-[10px] text-white/60 uppercase font-bold tracking-widest mb-1">Stops</p>
-          <p className="text-2xl font-black mono text-white">{itinerary.legs.length > 1 ? itinerary.legs.length - 1 : 'Non-stop'}</p>
-        </div>
-        <div className="text-center border-l border-white/10">
-          <p className="text-[10px] text-white/60 uppercase font-bold tracking-widest mb-1">Airline</p>
-          <p className="text-lg font-bold text-white">{itinerary.legs[0]?.airline || 'Unknown'}</p>
-        </div>
-        <div className="text-center border-l border-white/10">
-          <p className="text-[10px] text-white/60 uppercase font-bold tracking-widest mb-1">Reliability</p>
-          <p className="text-2xl font-black mono text-accent">{itinerary.reliabilityScore.toFixed(2)}/10</p>
-        </div>
-      </Card>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+      >
+        <Card className="grid grid-cols-2 md:grid-cols-5 gap-4">
+          <motion.div 
+            className="text-center"
+            whileHover={{ scale: 1.05 }}
+            transition={{ type: "spring", stiffness: 300 }}
+          >
+            <p className="text-[10px] text-white/60 uppercase font-bold tracking-widest mb-1">Total Price</p>
+            <p className="text-3xl font-black mono text-accent">RM{itinerary.price}</p>
+          </motion.div>
+          <div className="text-center border-l border-white/10">
+            <p className="text-[10px] text-white/60 uppercase font-bold tracking-widest mb-1">Duration</p>
+            <p className="text-2xl font-black mono text-white">{itinerary.totalDuration || 'N/A'}</p>
+          </div>
+          <div className="text-center border-l border-white/10">
+            <p className="text-[10px] text-white/60 uppercase font-bold tracking-widest mb-1">Stops</p>
+            <p className="text-2xl font-black mono text-white">{itinerary.legs.length > 1 ? itinerary.legs.length - 1 : 'Non-stop'}</p>
+          </div>
+          <div className="text-center border-l border-white/10">
+            <p className="text-[10px] text-white/60 uppercase font-bold tracking-widest mb-1">Airline</p>
+            <p className="text-lg font-bold text-white">{itinerary.legs[0]?.airline || 'Unknown'}</p>
+          </div>
+          <motion.div 
+            className="text-center border-l border-white/10"
+            whileHover={{ scale: 1.05 }}
+            transition={{ type: "spring", stiffness: 300 }}
+          >
+            <p className="text-[10px] text-white/60 uppercase font-bold tracking-widest mb-1">Reliability</p>
+            <motion.p 
+              className="text-3xl font-black mono text-green-400"
+              animate={{ 
+                textShadow: itinerary.reliabilityScore >= 9 
+                  ? ["0 0 0px rgba(74, 222, 128, 0)", "0 0 20px rgba(74, 222, 128, 0.6)", "0 0 0px rgba(74, 222, 128, 0)"]
+                  : "0 0 0px rgba(74, 222, 128, 0)"
+              }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              {itinerary.reliabilityScore.toFixed(2)}/10
+            </motion.p>
+          </motion.div>
+        </Card>
+      </motion.div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Main Reliability Card */}
-        <Card className="md:col-span-2 relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-8 opacity-5">
-            <Plane className="w-48 h-48 -rotate-45" />
-          </div>
-          
-          <div className="relative z-10">
-            <div className="flex items-center justify-between mb-8">
-              <div>
-                <h2 className="text-4xl font-black mono mb-1">{itinerary.reliabilityScore.toFixed(2)}/10</h2>
-                <p className="text-white/60 font-bold uppercase tracking-[0.2em] text-xs">Route Reliability Score</p>
-                {searchDate && (
-                  <div className="flex items-center gap-2 mt-2 text-accent">
-                    <Calendar className="w-3.5 h-3.5" />
-                    <span className="text-xs font-bold uppercase tracking-widest">
-                      {format(parseISO(searchDate), 'EEE, dd MMM yyyy')}
-                    </span>
-                  </div>
-                )}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="md:col-span-2"
+        >
+          <Card className="relative overflow-hidden">
+            <motion.div 
+              className="absolute top-0 right-0 p-8 opacity-5"
+              animate={{ rotate: 360 }}
+              transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
+            >
+              <Plane className="w-48 h-48 -rotate-45" />
+            </motion.div>
+            
+            <div className="relative z-10">
+              <div className="flex items-center justify-between mb-8">
+                <div>
+                  <motion.h2 
+                    className="text-5xl font-black mono mb-1"
+                    initial={{ scale: 0.5, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ type: "spring", stiffness: 200, delay: 0.3 }}
+                  >
+                    {itinerary.reliabilityScore.toFixed(2)}/10
+                  </motion.h2>
+                  <p className="text-white/60 font-bold uppercase tracking-[0.2em] text-xs">Route Reliability Score</p>
+                  {searchDate && (
+                    <motion.div 
+                      className="flex items-center gap-2 mt-2 text-accent"
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.4 }}
+                    >
+                      <Calendar className="w-3.5 h-3.5" />
+                      <span className="text-xs font-bold uppercase tracking-widest">
+                        {format(parseISO(searchDate), 'EEE, dd MMM yyyy')}
+                      </span>
+                    </motion.div>
+                  )}
+                </div>
+                <motion.div
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ type: "spring", stiffness: 200, delay: 0.5 }}
+                >
+                  <Badge variant={itinerary.status === 'RELIABLE' ? 'success' : 'warning'}>{itinerary.status}</Badge>
+                </motion.div>
               </div>
-              <Badge variant={itinerary.status === 'RELIABLE' ? 'success' : 'warning'}>{itinerary.status}</Badge>
-            </div>
 
             <div className="space-y-8">
               {itinerary.legs.map((leg, index) => (
@@ -3271,27 +3340,60 @@ function ItineraryDetailView({
         </Card>
 
         {/* Connection Risk Card */}
-        <Card className="flex flex-col justify-between border-accent/20 bg-accent/5">
-          <div>
-            <div className="flex items-center gap-2 text-accent mb-6">
-              <AlertCircle className="w-4 h-4" />
-              <span className="text-[10px] font-bold uppercase tracking-widest">Connection Risk Assessment</span>
-            </div>
-            <div className="text-center py-6">
-              <div className="text-5xl font-black mono text-white mb-2">{Math.round(itinerary.connectionRiskValue)}%</div>
-              <p className="text-white/70 text-[10px] font-bold uppercase tracking-widest">Probability of Missed Connection</p>
-            </div>
-            <div className="space-y-4 mt-6">
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-white/60 uppercase font-bold">Risk Level</span>
-                <Badge variant={itinerary.connectionRisk === 'LOW' ? 'success' : 'warning'}>{itinerary.connectionRisk}</Badge>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+        >
+          <Card className="flex flex-col justify-between border-accent/20 bg-accent/5 relative overflow-hidden">
+            {/* Animated glow effect for LOW risk */}
+            {itinerary.connectionRisk === 'LOW' && (
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-transparent"
+                animate={{ opacity: [0.3, 0.6, 0.3] }}
+                transition={{ duration: 3, repeat: Infinity }}
+              />
+            )}
+            
+            <div className="relative z-10">
+              <div className="flex items-center gap-2 text-accent mb-6">
+                <AlertCircle className="w-4 h-4" />
+                <span className="text-[10px] font-bold uppercase tracking-widest">Connection Risk Assessment</span>
               </div>
-              <div className="p-3 bg-white/5 rounded-lg text-[10px] text-white/80 leading-relaxed italic border border-white/5">
-                "Based on historical delay propagation and airport transfer characteristics at {itinerary.legs[0]?.arrival?.airport || 'destination'}."
+              <div className="text-center py-6">
+                <motion.div 
+                  className="text-6xl font-black mono text-white mb-2"
+                  initial={{ scale: 0.5, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ type: "spring", stiffness: 200, delay: 0.4 }}
+                >
+                  {Math.round(itinerary.connectionRiskValue)}%
+                </motion.div>
+                <p className="text-white/70 text-[10px] font-bold uppercase tracking-widest">Probability of Missed Connection</p>
+              </div>
+              <div className="space-y-4 mt-6">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-white/60 uppercase font-bold">Risk Level</span>
+                  <motion.div
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ delay: 0.5 }}
+                  >
+                    <Badge variant={itinerary.connectionRisk === 'LOW' ? 'success' : 'warning'}>{itinerary.connectionRisk}</Badge>
+                  </motion.div>
+                </div>
+                <motion.div 
+                  className="p-3 bg-white/5 rounded-lg text-[10px] text-white/80 leading-relaxed italic border border-white/5"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.6 }}
+                >
+                  "Based on historical delay propagation and airport transfer characteristics at {itinerary.legs[0]?.arrival?.airport || 'destination'}."
+                </motion.div>
               </div>
             </div>
-          </div>
-        </Card>
+          </Card>
+        </motion.div>
 
         {/* Alternative Suggestions (F009) */}
         <div className="md:col-span-3 space-y-4">
