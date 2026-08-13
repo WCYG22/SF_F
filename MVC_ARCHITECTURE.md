@@ -2,7 +2,7 @@
 
 ## 6.3 Overview of MVC and Route Directories
 
-As Smart Flight is built using React, it follows a component-based architecture that can be mapped to the Model-View-Controller (MVC) pattern. This section explains how the directory structure aligns with MVC principles, where Models represent data structures and business logic, Views handle the user interface presentation, Controllers manage the application flow and user interactions, and Routes define the API endpoints and navigation structure.
+  As Smart Flight is built using React, it follows a component-based architecture that can be mapped to the Model-View-Controller (MVC) pattern. This section explains how the directory structure aligns with MVC principles, where Models represent data structures and business logic, Views handle the user interface presentation, Controllers manage the application flow and user interactions, and Routes define the API endpoints and navigation structure.
 
 ---
 

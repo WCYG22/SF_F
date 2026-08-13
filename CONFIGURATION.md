@@ -291,7 +291,7 @@ function calculateReliabilityScore(itinerary: Itinerary): number {
   return Math.max(0, Math.min(10, score));
 }
 ```
-*Figure 6.9: Reliability Score Calculation Algorithm*
+*Figure 6.9:  *
 
 For example, Figure 6.9 shows the multi-factor reliability calculation. The algorithm starts with a perfect score of 10, deducts points based on disruption probability of each flight leg, applies penalties for connection risk levels, and reduces score for multiple connections. The final score is clamped between 0 and 10.
 
@@ -371,7 +371,7 @@ const displayDate = format(parseISO(isoString), 'dd MMM yyyy');
 // Output: "15 Jan 2025"
 
 // Format time
-const displayTime = format(parseISO(isoString), 'HH:mm');
+const displayTime = format(parseISO(isoString), 'HH:mm');   
 // Output: "14:30"
 
 // Date arithmetic

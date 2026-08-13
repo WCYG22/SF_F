@@ -62,7 +62,6 @@ Smart Flight is a modern flight search platform that helps users find reliable f
 - Firebase Authentication - User auth with email verification
 - Cloud Firestore - Real-time NoSQL database
 - Firebase Security Rules - Data access control
-- Google Gemini AI - Flight search intelligence
 
 ### APIs
 - Custom Flight Search API - Powered by Google Gemini
@@ -375,15 +374,14 @@ This project is licensed under the MIT License.
 **Wong Cheng Yong**
 - GitHub: [@WCYG22](https://github.com/WCYG22)
 - Email: wongchengyong100@gmail.com
-- Student ID: B1LM27
-- Program: METS (UCOMS DS)
+- Student ID: M44100127
+- Program:UCOMS DS
 - Institution: University of Wollongong Malaysia KDU
 
 ---
 
 ## Acknowledgments
 
-- Google Gemini AI for flight search intelligence
 - Firebase for backend infrastructure
 - Lucide Icons for icon library
 - Framer Motion for smooth animations

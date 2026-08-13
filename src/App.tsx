@@ -125,6 +125,17 @@ export default function App() {
   const [isDemoMode, setIsDemoMode] = useState(false);
 
   const [error, setError] = useState<string | null>(null);
+  
+  // Search confirmation modal state
+  const [showSearchConfirmModal, setShowSearchConfirmModal] = useState(false);
+  const [pendingSearchData, setPendingSearchData] = useState<{
+    tripType: 'oneway' | 'return' | 'multicity';
+    origin: string;
+    destination: string;
+    date: string;
+    returnDate?: string;
+    multiCityLegs?: Array<{id: string; origin: string; destination: string; date: string}>;
+  } | null>(null);
 
   useEffect(() => {
     const checkApiKey = async () => {
@@ -212,21 +223,18 @@ export default function App() {
     return () => unsubscribe();
   }, [user]);
 
-  const handleSearch = async (e?: React.FormEvent) => {
+  const handleShowSearchConfirmation = (e?: React.FormEvent) => {
     if (e) {
       e.preventDefault();
-    } else {
-      return;
     }
     
+    // Validate before showing confirmation
     if (tripType === 'multicity') {
-      // Validate multi-city legs
       if (multiCityLegs.some(leg => !leg.origin || !leg.destination || !leg.date)) {
         setError("Please select departure, destination, and travel date for all legs");
         return;
       }
     } else {
-      // Validate regular trips
       if (!origin.trim() || !destination.trim() || !date) {
         setError("Please select departure, destination, and travel date");
         return;
@@ -238,14 +246,34 @@ export default function App() {
       }
     }
     
+    // Store the search data
+    setPendingSearchData({
+      tripType,
+      origin,
+      destination,
+      date,
+      returnDate,
+      multiCityLegs: [...multiCityLegs]
+    });
+    
+    // Show confirmation modal
+    setShowSearchConfirmModal(true);
+  };
+
+  const handleSearch = async () => {
+    if (!pendingSearchData) return;
+    
+    // Close confirmation modal
+    setShowSearchConfirmModal(false);
+    
     setLoading(true);
     setIsSearching(true);
     setError(null);
     try {
-      if (tripType === 'multicity') {
+      if (pendingSearchData.tripType === 'multicity') {
         // Search for multi-city flights
         const allResults: Itinerary[] = [];
-        for (const leg of multiCityLegs) {
+        for (const leg of pendingSearchData.multiCityLegs || []) {
           const results = await searchFlight(`${leg.origin} to ${leg.destination} on ${leg.date}`, isDemoMode, leg.date);
           allResults.push(...results);
         }
@@ -253,25 +281,25 @@ export default function App() {
         setReturnItineraries([]);
         
         // Save search history for first leg
-        if (multiCityLegs.length > 0 && allResults.length > 0) {
+        if (pendingSearchData.multiCityLegs && pendingSearchData.multiCityLegs.length > 0 && allResults.length > 0) {
           await handleSaveSearchHistory(
-            multiCityLegs[0].origin, 
-            multiCityLegs[multiCityLegs.length - 1].destination, 
-            multiCityLegs[0].date,
+            pendingSearchData.multiCityLegs[0].origin, 
+            pendingSearchData.multiCityLegs[pendingSearchData.multiCityLegs.length - 1].destination, 
+            pendingSearchData.multiCityLegs[0].date,
             allResults.length
           );
         }
       } else {
         // Search outbound flight
-        const outboundResults = await searchFlight(`${origin} to ${destination} on ${date}`, isDemoMode, date);
+        const outboundResults = await searchFlight(`${pendingSearchData.origin} to ${pendingSearchData.destination} on ${pendingSearchData.date}`, isDemoMode, pendingSearchData.date);
         setItineraries(outboundResults);
 
         // Save search history
-        await handleSaveSearchHistory(origin, destination, date, outboundResults.length);
+        await handleSaveSearchHistory(pendingSearchData.origin, pendingSearchData.destination, pendingSearchData.date, outboundResults.length);
 
         // If return trip, also search return flight
-        if (tripType === 'return') {
-          const returnResults = await searchFlight(`${destination} to ${origin} on ${returnDate}`, isDemoMode, returnDate);
+        if (pendingSearchData.tripType === 'return' && pendingSearchData.returnDate) {
+          const returnResults = await searchFlight(`${pendingSearchData.destination} to ${pendingSearchData.origin} on ${pendingSearchData.returnDate}`, isDemoMode, pendingSearchData.returnDate);
           setReturnItineraries(returnResults);
         } else {
           setReturnItineraries([]);
@@ -285,6 +313,7 @@ export default function App() {
       }
     } finally {
       setLoading(false);
+      setPendingSearchData(null);
     }
   };
 
@@ -831,6 +860,171 @@ export default function App() {
           </>
         )}
       </AnimatePresence>
+      
+      {/* Search Confirmation Modal */}
+      <AnimatePresence>
+        {showSearchConfirmModal && pendingSearchData && (
+          <>
+            {/* Blurred Background */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[100] bg-black/40 backdrop-blur-sm"
+              onClick={() => {
+                setShowSearchConfirmModal(false);
+                setPendingSearchData(null);
+              }}
+            />
+            
+            {/* Modal */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="fixed inset-0 z-[101] flex items-center justify-center p-4"
+            >
+              <div className="bg-background border border-white/10 rounded-2xl p-8 shadow-2xl max-w-2xl w-full">
+                <div className="flex flex-col gap-6">
+                  {/* Header */}
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-accent/20 rounded-xl flex items-center justify-center">
+                      <Search className="w-6 h-6 text-accent" />
+                    </div>
+                    <div>
+                      <h3 className="text-2xl font-black text-white">Confirm Your Search</h3>
+                      <p className="text-sm text-white/60">Please review your travel details before searching</p>
+                    </div>
+                  </div>
+
+                  {/* Search Details */}
+                  <div className="space-y-4 p-6 bg-white/5 border border-white/10 rounded-xl">
+                    {pendingSearchData.tripType === 'multicity' ? (
+                      // Multi-city details
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Navigation className="w-4 h-4 text-accent" />
+                          <span className="text-xs font-bold uppercase tracking-widest text-white/70">Multi-City Trip</span>
+                        </div>
+                        {pendingSearchData.multiCityLegs?.map((leg, index) => {
+                          const originAirport = AIRPORT_REGIONS.flatMap(r => r.airports).find(a => a.code === leg.origin);
+                          const destAirport = AIRPORT_REGIONS.flatMap(r => r.airports).find(a => a.code === leg.destination);
+                          return (
+                            <div key={leg.id} className="flex items-center gap-4 p-4 bg-white/5 rounded-lg border border-white/5">
+                              <div className="flex items-center gap-2 text-accent font-bold">
+                                <span className="text-lg">Leg {index + 1}</span>
+                              </div>
+                              <div className="flex-1 flex items-center gap-4">
+                                <div className="flex-1">
+                                  <div className="text-xs text-white/50 mb-1">From</div>
+                                  <div className="font-bold text-white">{originAirport?.city || leg.origin}</div>
+                                  <div className="text-xs text-white/60 mono">{leg.origin}</div>
+                                </div>
+                                <ArrowRight className="w-5 h-5 text-accent" />
+                                <div className="flex-1">
+                                  <div className="text-xs text-white/50 mb-1">To</div>
+                                  <div className="font-bold text-white">{destAirport?.city || leg.destination}</div>
+                                  <div className="text-xs text-white/60 mono">{leg.destination}</div>
+                                </div>
+                                <div className="flex-1">
+                                  <div className="text-xs text-white/50 mb-1">Date</div>
+                                  <div className="font-bold text-white">{format(parseISO(leg.date), 'PP')}</div>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      // One-way or Return trip details
+                      <>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div className="flex flex-col gap-2">
+                            <div className="flex items-center gap-2">
+                              <MapPin className="w-4 h-4 text-accent" />
+                              <span className="text-xs font-bold uppercase tracking-widest text-white/70">From</span>
+                            </div>
+                            <div className="p-3 bg-white/5 rounded-lg">
+                              <div className="font-bold text-white text-lg">
+                                {AIRPORT_REGIONS.flatMap(r => r.airports).find(a => a.code === pendingSearchData.origin)?.city || pendingSearchData.origin}
+                              </div>
+                              <div className="text-xs text-white/60 mono">{pendingSearchData.origin}</div>
+                            </div>
+                          </div>
+
+                          <div className="flex flex-col gap-2">
+                            <div className="flex items-center gap-2">
+                              <Navigation className="w-4 h-4 text-accent" />
+                              <span className="text-xs font-bold uppercase tracking-widest text-white/70">To</span>
+                            </div>
+                            <div className="p-3 bg-white/5 rounded-lg">
+                              <div className="font-bold text-white text-lg">
+                                {AIRPORT_REGIONS.flatMap(r => r.airports).find(a => a.code === pendingSearchData.destination)?.city || pendingSearchData.destination}
+                              </div>
+                              <div className="text-xs text-white/60 mono">{pendingSearchData.destination}</div>
+                            </div>
+                          </div>
+
+                          <div className="flex flex-col gap-2">
+                            <div className="flex items-center gap-2">
+                              <Calendar className="w-4 h-4 text-accent" />
+                              <span className="text-xs font-bold uppercase tracking-widest text-white/70">Departure Date</span>
+                            </div>
+                            <div className="p-3 bg-white/5 rounded-lg">
+                              <div className="font-bold text-white">{format(parseISO(pendingSearchData.date), 'PP')}</div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {pendingSearchData.tripType === 'return' && pendingSearchData.returnDate && (
+                          <div className="pt-4 border-t border-white/5">
+                            <div className="flex items-center gap-4">
+                              <ArrowRightLeft className="w-4 h-4 text-accent" />
+                              <span className="text-xs font-bold uppercase tracking-widest text-white/70">Return Flight</span>
+                            </div>
+                            <div className="mt-3 p-3 bg-white/5 rounded-lg flex items-center justify-between">
+                              <div>
+                                <div className="text-xs text-white/50 mb-1">Return Date</div>
+                                <div className="font-bold text-white">{format(parseISO(pendingSearchData.returnDate), 'PP')}</div>
+                              </div>
+                              <div className="text-sm text-white/60">
+                                {AIRPORT_REGIONS.flatMap(r => r.airports).find(a => a.code === pendingSearchData.destination)?.city || pendingSearchData.destination}
+                                {' → '}
+                                {AIRPORT_REGIONS.flatMap(r => r.airports).find(a => a.code === pendingSearchData.origin)?.city || pendingSearchData.origin}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => {
+                        setShowSearchConfirmModal(false);
+                        setPendingSearchData(null);
+                      }}
+                      className="flex-1 px-6 py-3 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-xl font-bold uppercase tracking-widest transition-all"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleSearch}
+                      className="flex-1 px-6 py-3 bg-accent hover:bg-accent/80 text-white rounded-xl font-bold uppercase tracking-widest transition-all shadow-lg shadow-accent/20 flex items-center justify-center gap-2"
+                    >
+                      <Check className="w-5 h-5" />
+                      Confirm & Search
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+      
       <AnimatePresence>
         {showSplash && (
           <motion.div
@@ -1074,19 +1268,8 @@ export default function App() {
               <header>
                 <form 
                   onSubmit={(e) => {
-                    // Only allow submission from the search button click
-                    if (e.nativeEvent.submitter?.type !== 'submit') {
-                      e.preventDefault();
-                      return;
-                    }
                     e.preventDefault();
-                    handleSearch(e);
-                  }}
-                  onKeyPress={(e) => {
-                    // Prevent Enter key from submitting form
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                    }
+                    handleShowSearchConfirmation(e);
                   }}
                   className="space-y-6">
                   <div className="bg-white/5 border border-white/10 rounded-3xl p-6 space-y-4">
