@@ -3338,6 +3338,7 @@ function ItineraryDetailView({
             </div>
           </div>
         </Card>
+      </motion.div>
 
         {/* Connection Risk Card */}
         <motion.div
