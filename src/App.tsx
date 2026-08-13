@@ -976,38 +976,38 @@ export default function App() {
                       <>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                           <div className="flex flex-col gap-2">
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 h-6">
                               <MapPin className="w-4 h-4 text-accent" />
                               <span className="text-xs font-bold uppercase tracking-widest text-white/70">From</span>
                             </div>
-                            <div className="p-3 bg-white/5 rounded-lg">
-                              <div className="font-bold text-white text-lg">
+                            <div className="p-4 bg-white/5 rounded-lg h-[72px] flex flex-col justify-center">
+                              <div className="font-bold text-white text-lg leading-tight">
                                 {AIRPORT_REGIONS.flatMap(r => r.airports).find(a => a.code === pendingSearchData.origin)?.city || pendingSearchData.origin}
                               </div>
-                              <div className="text-xs text-white/60 mono">{pendingSearchData.origin}</div>
+                              <div className="text-xs text-white/60 mono mt-1">{pendingSearchData.origin}</div>
                             </div>
                           </div>
 
                           <div className="flex flex-col gap-2">
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 h-6">
                               <Navigation className="w-4 h-4 text-accent" />
                               <span className="text-xs font-bold uppercase tracking-widest text-white/70">To</span>
                             </div>
-                            <div className="p-3 bg-white/5 rounded-lg">
-                              <div className="font-bold text-white text-lg">
+                            <div className="p-4 bg-white/5 rounded-lg h-[72px] flex flex-col justify-center">
+                              <div className="font-bold text-white text-lg leading-tight">
                                 {AIRPORT_REGIONS.flatMap(r => r.airports).find(a => a.code === pendingSearchData.destination)?.city || pendingSearchData.destination}
                               </div>
-                              <div className="text-xs text-white/60 mono">{pendingSearchData.destination}</div>
+                              <div className="text-xs text-white/60 mono mt-1">{pendingSearchData.destination}</div>
                             </div>
                           </div>
 
                           <div className="flex flex-col gap-2">
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 h-6">
                               <Calendar className="w-4 h-4 text-accent" />
                               <span className="text-xs font-bold uppercase tracking-widest text-white/70">Departure Date</span>
                             </div>
-                            <div className="p-3 bg-white/5 rounded-lg">
-                              <div className="font-bold text-white">{format(parseISO(pendingSearchData.date), 'PP')}</div>
+                            <div className="p-4 bg-white/5 rounded-lg h-[72px] flex items-center">
+                              <div className="font-bold text-white text-lg">{format(parseISO(pendingSearchData.date), 'PP')}</div>
                             </div>
                           </div>
                         </div>
