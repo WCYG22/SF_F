@@ -1325,7 +1325,13 @@ export default function App() {
                           <AirportSelector 
                             label="From"
                             value={origin}
-                            onChange={setOrigin}
+                            onChange={(newOrigin) => {
+                              setOrigin(newOrigin);
+                              // Clear results when changing search parameters
+                              setItineraries([]);
+                              setReturnItineraries([]);
+                              setIsSearching(false);
+                            }}
                             icon={<MapPin className="w-4 h-4" />}
                             placeholder="Departure"
                           />
@@ -1334,7 +1340,13 @@ export default function App() {
                           <AirportSelector 
                             label="To"
                             value={destination}
-                            onChange={setDestination}
+                            onChange={(newDest) => {
+                              setDestination(newDest);
+                              // Clear results when changing search parameters
+                              setItineraries([]);
+                              setReturnItineraries([]);
+                              setIsSearching(false);
+                            }}
                             icon={<Navigation className="w-4 h-4" />}
                             placeholder="Arrival"
                           />
@@ -1346,6 +1358,10 @@ export default function App() {
                             onChange={(newDate) => {
                               setDate(newDate);
                               setHasSelectedDate(true);
+                              // Clear results when changing search parameters
+                              setItineraries([]);
+                              setReturnItineraries([]);
+                              setIsSearching(false);
                             }}
                             originCode={origin}
                             destCode={destination}
@@ -1360,6 +1376,10 @@ export default function App() {
                               onChange={(newDate) => {
                                 setReturnDate(newDate);
                                 setHasSelectedReturnDate(true);
+                                // Clear results when changing search parameters
+                                setItineraries([]);
+                                setReturnItineraries([]);
+                                setIsSearching(false);
                               }}
                               originCode={destination}
                               destCode={origin}
