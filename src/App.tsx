@@ -223,11 +223,35 @@ export default function App() {
     return () => unsubscribe();
   }, [user]);
 
-  const handleShowSearchConfirmation = (e?: React.FormEvent) => {
-    if (e) {
-      e.preventDefault();
+  // Auto-show confirmation modal when all required fields are filled
+  useEffect(() => {
+    // Don't trigger if already loading, already showing modal, or if there's pending data
+    if (loading || showSearchConfirmModal || pendingSearchData) return;
+    
+    let shouldShowModal = false;
+    
+    if (tripType === 'multicity') {
+      // Check if all multi-city legs are complete
+      shouldShowModal = multiCityLegs.length > 0 && 
+        multiCityLegs.every(leg => leg.origin && leg.destination && leg.date);
+    } else if (tripType === 'return') {
+      // Check if origin, destination, date, and return date are all filled
+      shouldShowModal = origin && destination && date && returnDate;
+    } else {
+      // One-way: check if origin, destination, and date are all filled
+      shouldShowModal = origin && destination && date;
     }
     
+    if (shouldShowModal) {
+      // Small delay to avoid showing modal while user is still selecting
+      const timer = setTimeout(() => {
+        handleShowSearchConfirmation();
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [origin, destination, date, returnDate, multiCityLegs, tripType, loading, showSearchConfirmModal, pendingSearchData]);
+
+  const handleShowSearchConfirmation = () => {
     // Validate before showing confirmation
     if (tripType === 'multicity') {
       if (multiCityLegs.some(leg => !leg.origin || !leg.destination || !leg.date)) {
@@ -1269,7 +1293,8 @@ export default function App() {
                 <form 
                   onSubmit={(e) => {
                     e.preventDefault();
-                    handleShowSearchConfirmation(e);
+                    // Modal is triggered automatically when fields are complete
+                    // This just prevents form submission
                   }}
                   className="space-y-6">
                   <div className="bg-white/5 border border-white/10 rounded-3xl p-6 space-y-4">
@@ -1394,26 +1419,7 @@ export default function App() {
                       </div>
                     )}
                     
-                    <button 
-                      type="submit"
-                      disabled={loading || (tripType === 'multicity' ? multiCityLegs.some(leg => !leg.origin || !leg.destination || !leg.date) : !origin || !destination || !date || (tripType === 'return' && !returnDate))}
-                      className="w-full bg-accent hover:bg-accent/80 disabled:bg-accent/50 disabled:cursor-not-allowed text-white font-bold uppercase tracking-widest px-8 py-3 rounded-xl transition-all shadow-lg shadow-accent/20 flex items-center justify-center gap-2"
-                    >
-                      {loading ? (
-                        <motion.div
-                          animate={{ rotate: 360 }}
-                          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                          className="w-5 h-5"
-                        >
-                          <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full" />
-                        </motion.div>
-                      ) : (
-                        <>
-                          <Search className="w-5 h-5" />
-                          Search
-                        </>
-                      )}
-                    </button>
+                    {/* Search button removed - confirmation modal appears automatically when all fields are filled */}
                   </div>
                 </form>
 
